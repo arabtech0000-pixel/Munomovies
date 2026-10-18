@@ -1,0 +1,8 @@
+{
+  "name": "MunoWatch Mobile Streaming App UI",
+  "description": "Pixel-perfect mobile streaming app UI inspired by MunoWatch with featured hero, latest releases, continue watching, categories, veejay translations, search, saved watchlist, and full Flutter Dart source code export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
