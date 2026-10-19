@@ -6,6 +6,7 @@ import '../widgets/featured_movie_banner.dart';
 import '../widgets/movie_section_header.dart';
 import '../widgets/horizontal_movie_poster_list.dart';
 import '../widgets/continue_watching_section.dart';
+import 'category_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -35,7 +36,17 @@ class HomeScreen extends StatelessWidget {
               // 3. Latest on Munowatch Section
               MovieSectionHeader(
                 title: 'Latest on Munowatch',
-                onArrowTap: () {},
+                onArrowTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CategoryDetailScreen(
+                        categoryTitle: 'Latest on Munowatch',
+                        isVeejay: false,
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 10),
               const HorizontalMoviePosterList(

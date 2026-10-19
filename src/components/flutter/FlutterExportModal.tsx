@@ -70,7 +70,6 @@ flutter run
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Error generating zip:', err);
-      alert('Failed to generate zip file');
     } finally {
       setIsZipping(false);
     }

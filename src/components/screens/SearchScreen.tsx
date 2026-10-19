@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Cast, Search, Lock, X } from 'lucide-react';
-import { ALL_MOVIES_FOR_SEARCH } from '../../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Cast, Search, X, Loader2 } from 'lucide-react';
 import { Movie } from '../../types';
+import { MoviePoster } from '../common/MoviePoster';
+import { searchServerCatalog } from '../../services/api';
 
 interface SearchScreenProps {
   onBack: () => void;
@@ -17,107 +18,90 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
   onCastClick,
 }) => {
   const [query, setQuery] = useState(initialQuery);
+  const [results, setResults] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
 
-  const filteredMovies = ALL_MOVIES_FOR_SEARCH.filter((m) => {
-    if (!query.trim()) return true;
-    const q = query.toLowerCase();
-    return (
-      m.title.toLowerCase().includes(q) ||
-      m.genre.toLowerCase().includes(q) ||
-      m.vj.toLowerCase().includes(q) ||
-      (m.secondaryLabel && m.secondaryLabel.toLowerCase().includes(q))
-    );
-  });
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      setSearched(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      const movies = await searchServerCatalog(query);
+      setResults(movies);
+      setLoading(false);
+      setSearched(true);
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   return (
-    <div className="min-h-full bg-[#05051F] text-white flex flex-col pb-20 select-none">
-      {/* Top Header matching Screenshot 7 */}
+    <div className="min-h-full bg-[#05051F] text-white flex flex-col pb-24 select-none animate-fadeIn">
+      {/* Top Header */}
       <div className="h-14 px-3 flex items-center space-x-2 sticky top-0 bg-[#05051F]/95 backdrop-blur-md z-30 border-b border-white/5">
         <button
           onClick={onBack}
-          className="p-1 text-white hover:text-[#00D522] transition-colors focus:outline-none flex-shrink-0"
-          aria-label="Back"
+          className="p-1 text-white hover:text-[#00D522] transition-colors focus:outline-none flex-shrink-0 cursor-pointer"
         >
           <ArrowLeft className="w-6 h-6 stroke-[2.2]" />
         </button>
 
-        {/* Search Input Field */}
         <div className="flex-1 relative flex items-center">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for a movie, series, veeja..."
+            placeholder="Search for a movie, series, veejay..."
             autoFocus
             className="w-full bg-transparent text-white placeholder-[#9292A5] text-[14px] font-normal focus:outline-none pr-8 truncate"
           />
           {query && (
-            <button
-              onClick={() => setQuery('')}
-              className="absolute right-1 text-[#9292A5] hover:text-white p-1"
-            >
+            <button onClick={() => setQuery('')} className="absolute right-1 text-[#9292A5] hover:text-white p-1 cursor-pointer">
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        <button
-          onClick={onCastClick}
-          className="p-1.5 text-white/90 hover:text-white flex-shrink-0 focus:outline-none"
-        >
+        <button onClick={onCastClick} className="p-1.5 text-white/90 hover:text-white flex-shrink-0 focus:outline-none cursor-pointer">
           <Cast className="w-5 h-5 stroke-[2.2]" />
         </button>
       </div>
 
-
-
-      {/* 3-Column Dense Poster Grid matching Screenshot 7 */}
-      <div className="p-2 grid grid-cols-3 gap-2">
-        {filteredMovies.map((movie) => (
-          <div
-            key={movie.id}
-            onClick={() => onMovieClick(movie)}
-            className="relative aspect-[2/3] rounded-md overflow-hidden bg-[#111128] cursor-pointer group shadow-sm transition-transform duration-200 group-hover:scale-[1.02]"
-          >
-            {movie.posterUrl && (
-              <img
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#00D522]" />
+        </div>
+      ) : (
+        <div className="p-2.5 grid grid-cols-3 gap-2 flex-1">
+          {results.map((movie) => (
+            <div
+              key={movie.id}
+              onClick={() => onMovieClick(movie)}
+              className="cursor-pointer group flex flex-col"
+            >
+              <MoviePoster
                 src={movie.posterUrl}
                 alt={movie.title}
-                loading="lazy"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                title={movie.title}
+                vj={movie.vj}
+                isLocked={movie.isLocked}
+                episodesCount={movie.episodesCount}
+                showOverlayText
               />
-            )}
-
-            {/* Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none" />
-
-            {/* Top-Left Lock Icon */}
-            {movie.isLocked && (
-              <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-xs p-0.5 rounded">
-                <Lock className="w-3 h-3 text-white" />
-              </div>
-            )}
-
-            {/* Title snippet */}
-            <div className="absolute inset-x-0 bottom-0 p-1 text-center">
-              <p className="text-white text-[10px] font-bold truncate leading-tight uppercase">
-                {movie.title}
-              </p>
-              {movie.vj && (
-                <p className="text-[#00D522] text-[9px] font-medium truncate">
-                  {movie.vj}
-                </p>
-              )}
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {filteredMovies.length === 0 && (
+      {searched && results.length === 0 && !loading && (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-[#9292A5] mt-12">
           <Search className="w-12 h-12 text-[#9292A5]/50 mb-3" />
           <p className="text-white text-sm font-semibold">No results found for "{query}"</p>
-          <p className="text-xs text-[#9292A5] mt-1">Try searching for Vj Junior, action movies, or thriller series.</p>
         </div>
       )}
     </div>

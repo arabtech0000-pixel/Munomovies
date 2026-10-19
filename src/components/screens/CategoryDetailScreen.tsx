@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Cast, Bell, Search, Lock, Globe, Clock, Play } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { ArrowLeft, Cast, Bell, Search, X } from 'lucide-react';
 import { Movie } from '../../types';
+import { MoviePoster } from '../common/MoviePoster';
 
 interface CategoryDetailScreenProps {
   categoryTitle: string;
-  punctuality?: string;
-  endpoint?: string;
+  categoryType?: 'genre' | 'veejay';
   movies: Movie[];
   onBack: () => void;
   onMovieClick: (movie: Movie) => void;
@@ -16,144 +16,141 @@ interface CategoryDetailScreenProps {
 
 export const CategoryDetailScreen: React.FC<CategoryDetailScreenProps> = ({
   categoryTitle,
-  punctuality,
-  endpoint,
+  categoryType = 'genre',
   movies,
   onBack,
   onMovieClick,
-  onSearchClick,
+  onSearchClick: _onGlobalSearchClick,
   onCastClick,
   onNotificationsClick,
 }) => {
-  const [selectedVj, setSelectedVj] = useState<string>('All');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Extract unique VJs in this category
-  const availableVjs = ['All', ...Array.from(new Set(movies.map((m) => m.vj)))];
-
-  const filteredMovies = movies.filter((m) => {
-    if (selectedVj === 'All') return true;
-    return m.vj === selectedVj;
-  });
+  const filteredMovies = useMemo(() => {
+    if (!searchQuery.trim()) return movies;
+    const q = searchQuery.toLowerCase().trim();
+    return movies.filter(
+      (m) =>
+        m.title.toLowerCase().includes(q) ||
+        m.vj.toLowerCase().includes(q) ||
+        m.genre.toLowerCase().includes(q) ||
+        (m.secondaryLabel && m.secondaryLabel.toLowerCase().includes(q))
+    );
+  }, [movies, searchQuery]);
 
   return (
-    <div className="min-h-full bg-[#05051F] text-white flex flex-col pb-20 select-none animate-fadeIn">
-      {/* Top Header */}
-      <div className="h-14 px-4 flex items-center justify-between border-b border-white/[0.04] sticky top-0 bg-[#05051F]/95 backdrop-blur-md z-30">
-        <div className="flex items-center space-x-3">
+    <div className="min-h-full bg-[#05051F] text-white flex flex-col pb-24 select-none animate-fadeIn">
+      {/* Top Header matching Screenshots 201123 & 201136:
+          Back arrow, dynamic Title (e.g. "Vj Junior" or "Action"), Cast, Bell, Search */}
+      <div className="h-14 px-4 flex items-center justify-between sticky top-0 bg-[#05051F] z-30 border-b border-white/[0.04]">
+        <div className="flex items-center space-x-3.5 min-w-0">
           <button
             onClick={onBack}
-            className="p-1 -ml-1 text-white hover:text-[#00D522] transition-colors focus:outline-none"
+            className="p-1 -ml-1 text-white hover:text-[#00D522] transition-colors focus:outline-none cursor-pointer flex-shrink-0"
             aria-label="Go back"
           >
             <ArrowLeft className="w-6 h-6 stroke-[2.2]" />
           </button>
-          <h1 className="text-white text-[18px] font-bold tracking-tight truncate max-w-[200px]">
-            {categoryTitle}
-          </h1>
+          <div className="min-w-0">
+            <h1 className="text-white text-[19px] font-bold tracking-tight truncate">
+              {categoryTitle}
+            </h1>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-3.5">
+        <div className="flex items-center space-x-3.5 flex-shrink-0">
           <button
             onClick={onCastClick}
-            className="text-white hover:opacity-80 transition-opacity focus:outline-none"
-            aria-label="Cast"
+            className="text-white hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
+            aria-label="Cast to TV"
           >
             <Cast className="w-[20px] h-[20px] stroke-[2]" />
           </button>
           <button
             onClick={onNotificationsClick}
-            className="text-white hover:opacity-80 transition-opacity focus:outline-none"
+            className="text-white hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
             aria-label="Notifications"
           >
             <Bell className="w-[20px] h-[20px] stroke-[2]" />
           </button>
           <button
-            onClick={onSearchClick}
-            className="text-white hover:text-[#00D522] transition-colors focus:outline-none"
-            aria-label="Search"
+            onClick={() => {
+              if (isSearchOpen) {
+                setSearchQuery('');
+                setIsSearchOpen(false);
+              } else {
+                setIsSearchOpen(true);
+              }
+            }}
+            className={`p-1 transition-colors focus:outline-none cursor-pointer ${
+              isSearchOpen ? 'text-[#00D522]' : 'text-white hover:text-[#00D522]'
+            }`}
+            aria-label="Search within category"
           >
             <Search className="w-[20px] h-[20px] stroke-[2]" />
           </button>
         </div>
       </div>
 
-      {/* Category Punctuality & API Endpoint Information Banner */}
-      <div className="mx-4 mt-3 p-3 bg-white/[0.03] border border-white/[0.05] rounded-xl space-y-1.5">
-        {punctuality && (
-          <div className="flex items-center space-x-2 text-xs">
-            <Clock className="w-3.5 h-3.5 text-[#00D522]" />
-            <span className="text-[#00D522] font-semibold">{punctuality}</span>
-          </div>
-        )}
-        {endpoint && (
-          <div className="flex items-center space-x-2 text-[11px] text-[#9292A5]">
-            <Globe className="w-3.5 h-3.5 text-[#3B82F6]" />
-            <span className="font-mono truncate">https://munowatch.com{endpoint}</span>
-          </div>
-        )}
-      </div>
-
-      {/* VJ Filter Pills */}
-      {availableVjs.length > 2 && (
-        <div className="px-4 py-2.5 flex items-center space-x-2 overflow-x-auto scrollbar-none border-b border-white/[0.04]">
-          {availableVjs.map((vj) => (
+      {/* Expandable in-screen search bar */}
+      {isSearchOpen && (
+        <div className="px-3.5 py-2 bg-[#0A0A2C] border-b border-white/[0.06] flex items-center space-x-2 animate-fadeIn">
+          <Search className="w-4 h-4 text-[#8E8E9F] flex-shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={`Filter ${categoryTitle}...`}
+            autoFocus
+            className="w-full bg-transparent text-white placeholder-[#8E8E9F] text-sm focus:outline-none"
+          />
+          {searchQuery && (
             <button
-              key={vj}
-              onClick={() => setSelectedVj(vj)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                selectedVj === vj
-                  ? 'bg-[#00D522] text-[#05051F]'
-                  : 'bg-white/[0.06] text-[#9292A5] hover:text-white'
-              }`}
+              onClick={() => setSearchQuery('')}
+              className="p-1 text-[#8E8E9F] hover:text-white"
             >
-              {vj}
+              <X className="w-4 h-4" />
             </button>
-          ))}
+          )}
         </div>
       )}
 
-      {/* Grid of Posters */}
-      <div className="p-4 grid grid-cols-3 gap-2.5 flex-1">
+      {/* 3-Column Dense Poster Grid directly beneath the app bar matching Screenshots 201123 & 201136 */}
+      <div className="p-2.5 grid grid-cols-3 gap-2 flex-1">
         {filteredMovies.map((movie) => (
           <div
             key={movie.id}
             onClick={() => onMovieClick(movie)}
             className="cursor-pointer group flex flex-col"
           >
-            <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-[#111128] shadow-md transition-transform group-hover:scale-105">
-              {movie.posterUrl && (
-                <img
-                  src={movie.posterUrl}
-                  alt={movie.title}
-                  className="w-full h-full object-cover"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-
-              {movie.isLocked && (
-                <div className="absolute top-1.5 left-1.5 bg-black/60 p-1 rounded">
-                  <Lock className="w-3 h-3 text-white" />
-                </div>
-              )}
-
-              {movie.episodesCount && (
-                <div className="absolute top-1.5 right-1.5 bg-[#00D522] text-[#05051F] px-1 rounded text-[9px] font-black">
-                  EPS {movie.episodesCount}
-                </div>
-              )}
-
-              <div className="absolute inset-x-0 bottom-0 p-1.5">
-                <p className="text-white text-[10.5px] font-bold truncate leading-tight">
-                  {movie.title}
-                </p>
-                <p className="text-[#00D522] text-[9.5px] font-medium truncate mt-0.5">
-                  {movie.vj}
-                </p>
-              </div>
-            </div>
+            <MoviePoster
+              src={movie.posterUrl}
+              alt={movie.title}
+              title={movie.title}
+              vj={movie.vj}
+              isLocked={movie.isLocked ?? true}
+              episodesCount={movie.episodesCount}
+              isPlaceholder={!movie.posterUrl || movie.posterUrl === 'placeholder'}
+            />
           </div>
         ))}
       </div>
+
+      {filteredMovies.length === 0 && (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-[#8E8E9F] mt-12">
+          <Search className="w-10 h-10 text-[#8E8E9F]/40 mb-3" />
+          <p className="text-white text-sm font-semibold">
+            No movies found for "{searchQuery}"
+          </p>
+          <button
+            onClick={() => setSearchQuery('')}
+            className="mt-4 px-4 py-1.5 rounded-full bg-white/10 text-xs font-semibold text-white hover:bg-white/20 transition-colors cursor-pointer"
+          >
+            Clear Filter
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -14,10 +14,19 @@ export interface Movie {
   heroBannerUrl?: string;
   isLocked?: boolean;
   progressPercent?: number; // for continue watching
-  episodesCount?: number;
+  episodesCount?: number | string;
   uploadedTimeAgo?: string;
-  punctuality?: string; // e.g. "On-Time: 2h ago" or "Daily 8PM Drop"
   endpoint?: string;    // MunoWatch API endpoint
+  punctuality?: string;
+  videoUrl?: string;
+  // TMDB Metadata fields (Source B)
+  tmdbId?: number | string;
+  originalTitle?: string;
+  releaseDate?: string;
+  voteAverage?: number;
+  genresList?: string[];
+  runtimeMinutes?: number;
+  metadataResolved?: boolean;
 }
 
 export interface MovieCategory {
@@ -59,6 +68,8 @@ export type ViewScreen =
   | 'settings'
   | 'account'
   | 'support'
-  | 'category_view';
+  | 'category_view'
+  | 'admin_dashboard'
+  | 'avatar_picker';
 
 

@@ -1,34 +1,39 @@
 import React from 'react';
-import { ArrowLeft, Cast, Bell, Search, CloudDownload, Trash2 } from 'lucide-react';
+import { ArrowLeft, Cast, Bell, Search, Trash2, Play } from 'lucide-react';
 import { Movie } from '../../types';
+import { MoviePoster } from '../common/MoviePoster';
 
 interface DownloadsScreenProps {
   onBack: () => void;
   onMovieClick: (movie: Movie) => void;
+  onPlayMovie?: (movie: Movie) => void;
   onSearchClick: () => void;
   onCastClick: () => void;
   onNotificationsClick: () => void;
-  downloadedMovies?: Movie[];
-  onDeleteDownload?: (id: string) => void;
+  downloadedMovies: Movie[];
+  onDeleteDownload: (id: string) => void;
+  onExploreClick: () => void;
 }
 
 export const DownloadsScreen: React.FC<DownloadsScreenProps> = ({
   onBack,
   onMovieClick,
+  onPlayMovie,
   onSearchClick,
   onCastClick,
   onNotificationsClick,
   downloadedMovies = [],
   onDeleteDownload,
+  onExploreClick,
 }) => {
   return (
-    <div className="min-h-full bg-[#05051F] text-white flex flex-col pb-20 select-none">
+    <div className="min-h-full bg-[#05051F] text-white flex flex-col pb-24 select-none animate-fadeIn">
       {/* Top Header matching Screenshot 4 */}
       <div className="h-14 px-4 flex items-center justify-between sticky top-0 bg-[#05051F]/95 backdrop-blur-md z-30 border-b border-white/[0.04]">
         <div className="flex items-center space-x-3">
           <button
             onClick={onBack}
-            className="p-1 -ml-1 text-white hover:text-white/80 transition-colors focus:outline-none"
+            className="p-1 -ml-1 text-white hover:text-[#00D522] transition-colors focus:outline-none cursor-pointer"
             aria-label="Go back"
           >
             <ArrowLeft className="w-6 h-6 stroke-[2.2]" />
@@ -41,21 +46,21 @@ export const DownloadsScreen: React.FC<DownloadsScreenProps> = ({
         <div className="flex items-center space-x-3.5">
           <button
             onClick={onCastClick}
-            className="text-white hover:opacity-80 transition-opacity focus:outline-none"
+            className="text-white hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
             aria-label="Cast"
           >
             <Cast className="w-[20px] h-[20px] stroke-[2]" />
           </button>
           <button
             onClick={onNotificationsClick}
-            className="text-white hover:opacity-80 transition-opacity focus:outline-none"
+            className="text-white hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
             aria-label="Notifications"
           >
             <Bell className="w-[20px] h-[20px] stroke-[2]" />
           </button>
           <button
             onClick={onSearchClick}
-            className="text-white hover:opacity-80 transition-colors focus:outline-none"
+            className="text-white hover:text-[#00D522] transition-colors focus:outline-none cursor-pointer"
             aria-label="Search"
           >
             <Search className="w-[20px] h-[20px] stroke-[2]" />
@@ -81,38 +86,59 @@ export const DownloadsScreen: React.FC<DownloadsScreenProps> = ({
             You haven't downloaded anything yet,<br />
             Find Something to Download.
           </p>
+
+          <button
+            onClick={onExploreClick}
+            className="mt-6 px-5 py-2.5 rounded-full bg-[#00D522] hover:bg-[#02ec27] text-[#05051F] font-bold text-xs transition-colors cursor-pointer"
+          >
+            Find Movies to Download
+          </button>
         </div>
       ) : (
-        <div className="px-4 py-3 space-y-3">
+        <div className="px-4 py-3 space-y-3 flex-1">
+          <div className="flex items-center justify-between text-xs text-[#9292A5] px-1 pb-1">
+            <span>{downloadedMovies.length} movies offline ready</span>
+            <span>Total: ~{downloadedMovies.length * 1.2} GB</span>
+          </div>
+
           {downloadedMovies.map((movie) => (
             <div
               key={movie.id}
-              onClick={() => onMovieClick(movie)}
-              className="flex items-center space-x-3 bg-white/[0.03] p-2.5 rounded-xl cursor-pointer"
+              onClick={() => (onPlayMovie ? onPlayMovie(movie) : onMovieClick(movie))}
+              className="flex items-center space-x-3 bg-white/[0.03] hover:bg-white/[0.06] p-2.5 rounded-xl cursor-pointer border border-white/[0.04] transition-colors group"
             >
-              {movie.posterUrl && (
-                <img
+              <div className="w-16 h-20 rounded-lg overflow-hidden flex-shrink-0 relative">
+                <MoviePoster
                   src={movie.posterUrl}
                   alt={movie.title}
-                  className="w-16 h-20 object-cover rounded-lg"
+                  title={movie.title}
+                  aspectRatio="aspect-[4/5]"
                 />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-semibold truncate">{movie.title}</p>
-                <p className="text-[#00D522] text-xs mt-0.5">{movie.vj}</p>
-                <p className="text-[#9292A5] text-[11px] mt-0.5">{movie.fileSize || '1.2 GB'}</p>
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Play className="w-5 h-5 text-white fill-white" />
+                </div>
               </div>
-              {onDeleteDownload && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteDownload(movie.id);
-                  }}
-                  className="p-2 text-[#9292A5] hover:text-red-400"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
+
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-semibold truncate group-hover:text-[#00D522] transition-colors">
+                  {movie.title}
+                </p>
+                <p className="text-[#00D522] text-xs mt-0.5 font-medium">{movie.vj}</p>
+                <p className="text-[#9292A5] text-[11px] mt-0.5">
+                  {movie.fileSize || '1.20 GB'} • 1080p Offline
+                </p>
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteDownload(movie.id);
+                }}
+                className="p-2 text-[#9292A5] hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                title="Delete downloaded file"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           ))}
         </div>

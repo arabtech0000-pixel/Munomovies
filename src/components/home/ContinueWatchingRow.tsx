@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { ArrowRight, Lock } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Movie } from '../../types';
+import { MoviePoster } from '../common/MoviePoster';
 
 interface ContinueWatchingRowProps {
   movies: Movie[];
@@ -17,7 +18,6 @@ export const ContinueWatchingRow: React.FC<ContinueWatchingRowProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragInfo = useRef({ startX: 0, scrollLeft: 0, hasMoved: false });
 
-  // Mouse drag-to-scroll support for desktop preview
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!rowRef.current) return;
     setIsDragging(true);
@@ -59,17 +59,14 @@ export const ContinueWatchingRow: React.FC<ContinueWatchingRowProps> = ({
         </h3>
         <button
           onClick={onArrowClick}
-          className="text-white hover:text-white/80 p-1 -mr-1 transition-colors focus:outline-none"
+          className="text-white hover:text-white/80 p-1 -mr-1 transition-colors focus:outline-none cursor-pointer"
           aria-label="View more continue watching"
         >
           <ArrowRight className="w-5 h-5 stroke-[2.2]" />
         </button>
       </div>
 
-      {/* 
-        Horizontally scrollable posters matching Screenshot 12:
-        Natural touch flow with no restrictive touch-pan-x, plus smooth desktop drag
-      */}
+      {/* Horizontally scrollable posters with playback progress bar along bottom edge */}
       <div
         ref={rowRef}
         onMouseDown={handleMouseDown}
@@ -84,24 +81,13 @@ export const ContinueWatchingRow: React.FC<ContinueWatchingRowProps> = ({
             onClick={() => handleMovieItemClick(movie)}
             className="flex-shrink-0 w-[124px] sm:w-[130px] cursor-pointer group"
           >
-            <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-[#111128] shadow-md transition-transform duration-200 group-hover:scale-[1.02]">
-              {movie.posterUrl && (
-                <img
-                  src={movie.posterUrl}
-                  alt={movie.title}
-                  loading="lazy"
-                  draggable={false}
-                  className="w-full h-full object-cover pointer-events-none"
-                />
-              )}
-
-              {/* Lock badge top left (Screenshot 12) */}
-              {movie.isLocked && (
-                <div className="absolute top-1.5 left-1.5 bg-black/50 backdrop-blur-xs p-1 rounded pointer-events-none">
-                  <Lock className="w-3.5 h-3.5 text-white/90" />
-                </div>
-              )}
-            </div>
+            <MoviePoster
+              src={movie.posterUrl}
+              alt={movie.title}
+              title={movie.title}
+              vj={movie.vj}
+              isLocked={movie.isLocked}
+            />
           </div>
         ))}
       </div>

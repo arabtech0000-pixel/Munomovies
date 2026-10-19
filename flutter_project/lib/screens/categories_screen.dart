@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'category_detail_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -104,7 +105,17 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     item,
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CategoryDetailScreen(
+                          categoryTitle: item,
+                          isVeejay: !_isGenreSelected,
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),

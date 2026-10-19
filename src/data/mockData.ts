@@ -2,20 +2,39 @@ import { Movie, Veejay, Genre, MovieCategory } from '../types';
 
 export const FEATURED_HERO_MOVIES: Movie[] = [
   {
-    id: 'omuzigo',
-    title: 'Omuzigo',
-    vj: 'Vj Junior',
-    genre: 'Drama',
-    duration: '01h 50m',
-    fileSize: '1.20 GB',
-    rating: '18+',
+    id: 'accused',
+    title: 'Accused',
+    secondaryLabel: 'Emmy',
+    vj: 'Vj Emmy',
+    genre: 'Drama / Faith',
+    duration: '01h 45m',
+    fileSize: '1.35 GB',
+    rating: '13+',
     narration: 'English to Luganda',
-    uploadedTimeAgo: '1 day ago',
+    uploadedTimeAgo: 'Just now',
     punctuality: 'Daily 8PM Release',
-    endpoint: '/watch?id=omuzigo',
-    description: 'For James, Omuzigo is more than a place to live. It represents the freedom, independence and uncertainty of single life. ...',
-    posterUrl: '',
-    heroBannerUrl: '',
+    endpoint: '/watch?id=accused',
+    description: 'Wrongfully accused of murdering his best friend, church minister Benson is finally released when the truth comes to light ...',
+    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+    heroBannerUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    isLocked: false,
+  },
+  {
+    id: 'the-beekeeper',
+    title: 'The Beekeeper',
+    secondaryLabel: 'Junior',
+    vj: 'Vj Junior',
+    genre: 'Action / Thriller',
+    duration: '01h 45m',
+    fileSize: '1.60 GB',
+    rating: '16+',
+    narration: 'English to Luganda',
+    uploadedTimeAgo: '6 hrs ago',
+    punctuality: 'Weekend Special Drop',
+    endpoint: '/watch?id=the-beekeeper',
+    description: "One man's brutal campaign for vengeance takes on national stakes after he is revealed to be a former operative of a clandestine organization known as 'Beekeepers'.",
+    posterUrl: 'https://image.tmdb.org/t/p/w500/A7EByudX0eOzlkQ2FIbogzyazm2.jpg',
+    heroBannerUrl: 'https://image.tmdb.org/t/p/w1280/4woSOUD0equAYzvwhWBHIJDCM88.jpg',
     isLocked: false,
   },
   {
@@ -32,8 +51,8 @@ export const FEATURED_HERO_MOVIES: Movie[] = [
     punctuality: 'Weekend Special Drop',
     endpoint: '/watch?id=under-water',
     description: 'A crew of oceanic researchers working for a deep-sea drilling company try to get to safety after a mysterious earthquake ravages their subterranean research facility.',
-    posterUrl: '',
-    heroBannerUrl: '',
+    posterUrl: 'https://image.tmdb.org/t/p/w500/gzlbb3ak5W569YJIoNzQ0ScTVEM.jpg',
+    heroBannerUrl: 'https://image.tmdb.org/t/p/w1280/ww7eC3BqSbFsyE7H8JWwQQmDanU.jpg',
     isLocked: false,
   }
 ];
@@ -53,7 +72,7 @@ export const LATEST_ON_MUNOWATCH: Movie[] = [
     punctuality: 'Today 4PM',
     endpoint: '/watch?id=lilian-music',
     description: 'An intimate, heartfelt documentary with Lilian delving into musical origins, grieving deep loss, and rediscovering light through sound.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -70,7 +89,7 @@ export const LATEST_ON_MUNOWATCH: Movie[] = [
     punctuality: 'Today 12PM',
     endpoint: '/watch?id=masterplan',
     description: 'A master thief enlists two strangers for an audacious Louvre heist targeting high-value royal artifacts, then reveals their shocking hidden connection.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -87,8 +106,8 @@ export const LATEST_ON_MUNOWATCH: Movie[] = [
     punctuality: '16h ago (Punctual)',
     endpoint: '/watch?id=love-of-your-life',
     description: 'Maya, a smart, wry nurse, is swept up in an immersive love, that sets her life on a trajectory she never would have imagined.',
-    posterUrl: '',
-    heroBannerUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    heroBannerUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
     isLocked: false,
   },
   {
@@ -105,7 +124,7 @@ export const LATEST_ON_MUNOWATCH: Movie[] = [
     punctuality: '1 day ago',
     endpoint: '/watch?id=sardar',
     description: 'A spy, who is estranged from his family due to a classified mission, suddenly meets his upright police officer son on opposite ends of a conspiracy.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -121,8 +140,8 @@ export const LATEST_ON_MUNOWATCH: Movie[] = [
     uploadedTimeAgo: '2 days ago',
     punctuality: 'On Schedule',
     endpoint: '/watch?id=matchbox',
-    description: 'High-octane desert warfare and modified armored transports clash in an all-or-nothing border canyon convoy rescue.',
-    posterUrl: '',
+    description: 'High-octane desert warfare and modified armored transports clash in an all-or-nothing border convoy rescue.',
+    posterUrl: 'https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -138,44 +157,44 @@ export const LATEST_ON_MUNOWATCH: Movie[] = [
     uploadedTimeAgo: '3 days ago',
     punctuality: 'On Schedule',
     endpoint: '/watch?id=fall-2',
-    description: 'Trapped on an overhang 2,000 feet above the alpine clouds with failing carabiners, two climbers fight the elements and each other.',
-    posterUrl: '',
+    description: 'Trapped on an overhang 2,000 feet above the alpine clouds with failing carabiners, two adrenaline climbers race against freezing mountain temperatures.',
+    posterUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   }
 ];
 
 export const CONTINUE_WATCHING_LIST: Movie[] = [
   {
-    id: 'love-of-nirvana',
+    id: 'nirvana',
     title: 'Love of Nirvana',
-    secondaryLabel: 'Junior',
     vj: 'Vj Junior',
     genre: 'Historical / Romance',
     duration: '45m / ep',
-    fileSize: '650 MB',
+    fileSize: '750 MB',
     rating: '16+',
     narration: 'English to Luganda',
-    punctuality: 'New Episode Weekly',
+    uploadedTimeAgo: 'Watched 2h ago',
+    punctuality: 'Every Mon & Wed',
     endpoint: '/watch?id=love-of-nirvana',
-    description: 'Xiao Wuxia, the young master of Yueluo City, endures humiliation in Liang Kingdom to uncover the truth of his family’s demise.',
-    posterUrl: '',
+    description: 'Xiao Wuxia, the young lord of Yueluo City, endures humiliation in Liang Kingdom to uncover the conspiracy behind his clan massacre.',
+    posterUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
     progressPercent: 68,
   },
   {
     id: 'fallout',
-    title: 'Fallout',
-    secondaryLabel: 'Junior',
+    title: 'Fallout (Series)',
     vj: 'Vj Junior',
-    genre: 'Sci-Fi / Adventure',
+    genre: 'Sci-Fi / Action',
     duration: '58m / ep',
     fileSize: '890 MB',
     rating: '18+',
     narration: 'English to Luganda',
-    punctuality: 'Daily 9PM',
+    uploadedTimeAgo: 'Watched yesterday',
+    punctuality: 'Full Season Available',
     endpoint: '/watch?id=fallout',
-    description: 'In a future post-apocalyptic Los Angeles brought on by nuclear decimation, citizens must live in underground bunkers to protect themselves from radiation.',
-    posterUrl: '',
+    description: 'In a future, post-apocalyptic Los Angeles, citizens must live in underground bunkers to protect themselves from radiation, mutants and bandits.',
+    posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
     progressPercent: 35,
   },
@@ -184,15 +203,15 @@ export const CONTINUE_WATCHING_LIST: Movie[] = [
     title: 'Snow Eagle Lord',
     secondaryLabel: 'Vj Emmy',
     vj: 'Vj Emmy',
-    genre: 'Fantasy / Wuxia',
+    genre: 'Fantasy / Martial Arts',
     duration: '42m / ep',
-    fileSize: '520 MB',
+    fileSize: '710 MB',
     rating: '13+',
     narration: 'English to Luganda',
     punctuality: 'Daily 7PM',
     endpoint: '/watch?id=snow-eagle-lord',
     description: 'Dongbo Xueying embarks on a legendary martial arts journey across icy mountains to awaken his ancient mother lineage.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
     progressPercent: 82,
   },
@@ -209,7 +228,7 @@ export const CONTINUE_WATCHING_LIST: Movie[] = [
     punctuality: 'Punctual',
     endpoint: '/watch?id=secret-kingdom',
     description: 'Peter and Verity discover a hidden realm beneath their bedroom floor where pangolins and mystical beasts await salvation.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
     progressPercent: 18,
   },
@@ -226,7 +245,7 @@ export const CONTINUE_WATCHING_LIST: Movie[] = [
     punctuality: 'Every Mon & Thu',
     endpoint: '/watch?id=zhan-zhao',
     description: 'Huo Ling Long flees an arranged marriage. She meets wounded Zhan Zhao, harboring evidence against a corrupt general.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
     progressPercent: 45,
   }
@@ -246,7 +265,7 @@ export const ACTION_MOVIES: Movie[] = [
     punctuality: '100% On-Time',
     endpoint: '/grid?pipe_type=g&pipe_id=1&page_name=Action',
     description: 'High-octane desert warfare and modified armored transports clash in an all-or-nothing border canyon convoy rescue.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -261,8 +280,8 @@ export const ACTION_MOVIES: Movie[] = [
     uploadedTimeAgo: '2 hrs ago',
     punctuality: 'Fresh Drop',
     endpoint: '/grid?pipe_type=g&pipe_id=1&page_name=Action',
-    description: 'A relentless siege on a remote tactical outpost test the limits of human endurance.',
-    posterUrl: '',
+    description: 'A relentless siege on a remote tactical outpost tests the limits of human endurance.',
+    posterUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -278,7 +297,7 @@ export const ACTION_MOVIES: Movie[] = [
     punctuality: 'Daily 8PM',
     endpoint: '/grid?pipe_type=g&pipe_id=1&page_name=Action',
     description: 'Rebel fighters take sword in hand against an oppressive dynasty during the dawn of rebellion.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -294,7 +313,23 @@ export const ACTION_MOVIES: Movie[] = [
     punctuality: 'On Schedule',
     endpoint: '/grid?pipe_type=g&pipe_id=1&page_name=Action',
     description: 'A spy, estranged from family, meets his police officer son on opposite ends of a conspiracy.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+    isLocked: false,
+  },
+  {
+    id: 'act-johnwick',
+    title: 'John Wick: Chapter 4',
+    vj: 'Vj Junior',
+    genre: 'Action / Crime',
+    duration: '02h 49m',
+    fileSize: '2.8 GB',
+    rating: '18+',
+    narration: 'English to Luganda',
+    uploadedTimeAgo: '3 days ago',
+    punctuality: 'Blockbuster Hit',
+    endpoint: '/grid?pipe_type=g&pipe_id=1&page_name=Action',
+    description: 'John Wick uncovers a path to defeating The High Table, facing deadly alliances across Paris, Osaka, and Berlin.',
+    posterUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   }
 ];
@@ -313,8 +348,8 @@ export const TV_SERIES_MOVIES: Movie[] = [
     uploadedTimeAgo: 'Today 9PM',
     punctuality: 'Daily 9:00 PM Episode Drop',
     endpoint: '/grid?pipe_type=g&pipe_id=3&page_name=Series',
-    description: 'A shy teenager sheltered by religious upbringing discovers a shocking power.',
-    posterUrl: '',
+    description: 'A shy teenager sheltered by religious upbringing discovers a shocking telekinetic power.',
+    posterUrl: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -330,8 +365,8 @@ export const TV_SERIES_MOVIES: Movie[] = [
     uploadedTimeAgo: 'Yesterday',
     punctuality: 'Bi-Weekly On-Time',
     endpoint: '/grid?pipe_type=g&pipe_id=3&page_name=Series',
-    description: 'Maeve and Conrad leave Harry to deal with messy gang fallout.',
-    posterUrl: '',
+    description: 'Maeve and Conrad leave Harry to deal with messy gang fallout as the cartel closes in.',
+    posterUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -347,8 +382,8 @@ export const TV_SERIES_MOVIES: Movie[] = [
     uploadedTimeAgo: '2 days ago',
     punctuality: 'Completed Series',
     endpoint: '/grid?pipe_type=g&pipe_id=3&page_name=Series',
-    description: 'An action drama of a niece who grew up in the hands of an uncle who runs a secret shopping mall.',
-    posterUrl: '',
+    description: 'An action drama of a niece who grew up in the hands of an uncle who runs a secret arms shopping mall.',
+    posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -364,8 +399,8 @@ export const TV_SERIES_MOVIES: Movie[] = [
     uploadedTimeAgo: '3 days ago',
     punctuality: 'Mon & Thu Drops',
     endpoint: '/grid?pipe_type=g&pipe_id=3&page_name=Series',
-    description: 'Huo Ling Long flees an arranged marriage and meets Zhan Zhao.',
-    posterUrl: '',
+    description: 'Huo Ling Long flees an arranged marriage and meets Zhan Zhao bearing state secrets.',
+    posterUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   }
 ];
@@ -384,7 +419,7 @@ export const KUNGFU_MOVIES: Movie[] = [
     punctuality: '100% Punctual',
     endpoint: '/grid?pipe_type=g&pipe_id=11&page_name=Kungu+Fu',
     description: 'Ancient martial arts bloodline awakened through icy northern mountain trials.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -400,7 +435,7 @@ export const KUNGFU_MOVIES: Movie[] = [
     punctuality: 'Daily 7PM',
     endpoint: '/grid?pipe_type=g&pipe_id=11&page_name=Kungu+Fu',
     description: 'Xiao Wuxia endures humiliation to avenge his clan with lethal ancient sword techniques.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -416,7 +451,7 @@ export const KUNGFU_MOVIES: Movie[] = [
     punctuality: 'Weekly Saturday',
     endpoint: '/grid?pipe_type=g&pipe_id=11&page_name=Kungu+Fu',
     description: 'A master swordsman defends a quiet village against an advancing warlord brigade.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   }
 ];
@@ -435,7 +470,7 @@ export const VJ_JUNIOR_EXCLUSIVES: Movie[] = [
     punctuality: 'Top Ranked VJ',
     endpoint: '/grid?pipe_type=vj&pipe_id=1&page_name=Vj+Junior',
     description: 'For James, Omuzigo is more than a place to live. The freedom of single life in Kampala.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -451,7 +486,7 @@ export const VJ_JUNIOR_EXCLUSIVES: Movie[] = [
     punctuality: 'Punctual Release',
     endpoint: '/grid?pipe_type=vj&pipe_id=1&page_name=Vj+Junior',
     description: 'A master thief enlists two strangers for an audacious Louvre heist.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -467,7 +502,7 @@ export const VJ_JUNIOR_EXCLUSIVES: Movie[] = [
     punctuality: 'Fresh Drop',
     endpoint: '/grid?pipe_type=vj&pipe_id=1&page_name=Vj+Junior',
     description: 'Maya, a smart wry nurse, is swept up in an immersive love that alters her destiny.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -483,7 +518,7 @@ export const VJ_JUNIOR_EXCLUSIVES: Movie[] = [
     punctuality: 'Top Rated',
     endpoint: '/grid?pipe_type=vj&pipe_id=1&page_name=Vj+Junior',
     description: 'Subterranean deep-sea drilling research crew flees catastrophic collapse.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   }
 ];
@@ -502,7 +537,7 @@ export const HORROR_MOVIES: Movie[] = [
     punctuality: '99.5% On-Time • Daily Horror Drop',
     endpoint: '/grid?pipe_type=g&pipe_id=2&page_name=Horror',
     description: '1956 France. A priest is murdered. An evil is spreading. Sister Irene once again comes face-to-face with Valak, the demon nun.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -518,7 +553,7 @@ export const HORROR_MOVIES: Movie[] = [
     punctuality: 'Weekend Special',
     endpoint: '/grid?pipe_type=g&pipe_id=2&page_name=Horror',
     description: 'About to embark on a world tour, global pop sensation Skye Riley begins experiencing increasingly terrifying and unexplainable events.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -534,7 +569,7 @@ export const HORROR_MOVIES: Movie[] = [
     punctuality: 'On Schedule',
     endpoint: '/grid?pipe_type=g&pipe_id=2&page_name=Horror',
     description: 'Experience the day the world went quiet in this terrifying continuation set in New York City amidst blind predatory creatures.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -550,9 +585,9 @@ export const HORROR_MOVIES: Movie[] = [
     punctuality: 'Late Night Release',
     endpoint: '/grid?pipe_type=g&pipe_id=2&page_name=Horror',
     description: 'Art the Clown is set to unleash another round of mayhem on the unsuspecting residents of Miles County on Christmas Eve.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
-  },
+  }
 ];
 
 export const ANIMES_MOVIES: Movie[] = [
@@ -570,7 +605,7 @@ export const ANIMES_MOVIES: Movie[] = [
     punctuality: '99.9% On-Time • Weekly Sunday',
     endpoint: '/grid?pipe_type=g&pipe_id=15&page_name=Animation',
     description: 'In a world where hunters must battle deadly monsters from dimensional gates, weak hunter Sung Jinwoo reawakens with a secret system.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -587,7 +622,7 @@ export const ANIMES_MOVIES: Movie[] = [
     punctuality: 'Daily 6PM Drops',
     endpoint: '/grid?pipe_type=g&pipe_id=15&page_name=Animation',
     description: 'Tanjiro undergoes rigorous training with the elite Hashira warriors in preparation for the upcoming climactic battle against Muzan.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -604,7 +639,7 @@ export const ANIMES_MOVIES: Movie[] = [
     punctuality: 'Completed Arc',
     endpoint: '/grid?pipe_type=g&pipe_id=15&page_name=Animation',
     description: 'On October 31st, a curtain drops over Shibuya trapping countless civilians. Satoru Gojo enters the barrier alone.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -620,9 +655,9 @@ export const ANIMES_MOVIES: Movie[] = [
     punctuality: 'Feature Film',
     endpoint: '/grid?pipe_type=g&pipe_id=15&page_name=Animation',
     description: 'The Red Ribbon Army from Goku’s past has returned with two new androids to challenge Gohan and Piccolo.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
-  },
+  }
 ];
 
 export const FAVORITES_MOVIES: Movie[] = [
@@ -640,7 +675,7 @@ export const FAVORITES_MOVIES: Movie[] = [
     punctuality: '99.9% Fan Rating (14,200 Likes)',
     endpoint: '/grid?pipe_type=fav&pipe_id=1&page_name=Favorites',
     description: 'A subterranean oceanic research crew attempts impossible escape through the Mariana Trench floor.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -657,7 +692,7 @@ export const FAVORITES_MOVIES: Movie[] = [
     punctuality: 'Most Streamed in Kampala',
     endpoint: '/grid?pipe_type=fav&pipe_id=1&page_name=Favorites',
     description: 'For James, Omuzigo is more than a place to live. It represents freedom, hustle and survival in modern Kampala.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -674,7 +709,7 @@ export const FAVORITES_MOVIES: Movie[] = [
     punctuality: 'User Favorite',
     endpoint: '/grid?pipe_type=fav&pipe_id=1&page_name=Favorites',
     description: 'Maya is swept up in an intense relationship that challenges everything she thought she wanted.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -691,9 +726,9 @@ export const FAVORITES_MOVIES: Movie[] = [
     punctuality: 'User Favorite',
     endpoint: '/grid?pipe_type=fav&pipe_id=1&page_name=Favorites',
     description: 'A master thief plans an impossible heist on high-security vault relics with twist revelations.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
-  },
+  }
 ];
 
 export const LAST_EPISODES_WATCHED: Movie[] = [
@@ -712,7 +747,7 @@ export const LAST_EPISODES_WATCHED: Movie[] = [
     punctuality: '100% Punctual • Episode 28 Dropped Today',
     endpoint: '/watch?id=love-of-nirvana&ep=28',
     description: 'Xiao Wuxia uncovers the conspiracy behind his clan in the capital while confronting the prince.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
     progressPercent: 92,
   },
@@ -731,7 +766,7 @@ export const LAST_EPISODES_WATCHED: Movie[] = [
     punctuality: 'Episode 3 Dropped On-Time',
     endpoint: '/watch?id=carrie&ep=3',
     description: 'A quiet teenager uncovers telekinetic forces after a humiliating school confrontation.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
     progressPercent: 45,
   },
@@ -750,29 +785,10 @@ export const LAST_EPISODES_WATCHED: Movie[] = [
     punctuality: 'Season 1 Finale Delivered',
     endpoint: '/watch?id=fallout&ep=8',
     description: 'Lucy finally discovers the horrifying truth about Vault 33 and her father in the wasteland ruins.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
     progressPercent: 78,
-  },
-  {
-    id: 'last-mobland-6',
-    title: 'Mobland Season 2 (EPS 6)',
-    secondaryLabel: 'Emmy',
-    vj: 'Vj Emmy',
-    genre: 'Crime Drama',
-    duration: '52m / ep',
-    fileSize: '574 MB',
-    rating: '18+',
-    episodesCount: 6,
-    narration: 'English to Luganda',
-    uploadedTimeAgo: '2 days ago',
-    punctuality: 'Weekly Saturday Drop',
-    endpoint: '/watch?id=mobland&ep=6',
-    description: 'The cartel tightens its grip around the sheriff department as undercover operatives go missing.',
-    posterUrl: '',
-    isLocked: false,
-    progressPercent: 30,
-  },
+  }
 ];
 
 export const DOWNLOADED_MOVIES: Movie[] = [
@@ -790,7 +806,7 @@ export const DOWNLOADED_MOVIES: Movie[] = [
     punctuality: 'Offline Ready (1080p Full HD)',
     endpoint: '/watch?id=omuzigo',
     description: 'For James, Omuzigo is more than a place to live. Freedom of single life in Kampala.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -807,7 +823,7 @@ export const DOWNLOADED_MOVIES: Movie[] = [
     punctuality: 'Offline Ready (720p HD)',
     endpoint: '/watch?id=sardar',
     description: 'A spy estranged from his family suddenly meets his police officer son on opposite ends of a mission.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -824,57 +840,10 @@ export const DOWNLOADED_MOVIES: Movie[] = [
     punctuality: 'Offline Ready (1080p)',
     endpoint: '/watch?id=solo-leveling&ep=1',
     description: 'Sung Jinwoo faces the double dungeon and receives the mysterious leveling system interface.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
-  },
+  }
 ];
-
-export const CATEGORIES_AT_LARGE: MovieCategory[] = [
-  {
-    id: 'action',
-    title: 'Action',
-    punctuality: '',
-    endpoint: '/grid?pipe_type=g&pipe_id=1&page_name=Action',
-    movies: ACTION_MOVIES,
-  },
-  {
-    id: 'horror',
-    title: 'Horror',
-    punctuality: '',
-    endpoint: '/grid?pipe_type=g&pipe_id=2&page_name=Horror',
-    movies: HORROR_MOVIES,
-  },
-  {
-    id: 'series',
-    title: 'Series',
-    punctuality: '',
-    endpoint: '/grid?pipe_type=g&pipe_id=3&page_name=Series',
-    movies: TV_SERIES_MOVIES,
-  },
-  {
-    id: 'kungfu',
-    title: 'Kungu Fu',
-    punctuality: '',
-    endpoint: '/grid?pipe_type=g&pipe_id=11&page_name=Kungu+Fu',
-    movies: KUNGFU_MOVIES,
-  },
-  {
-    id: 'animation',
-    title: 'Animation',
-    punctuality: '',
-    endpoint: '/grid?pipe_type=g&pipe_id=15&page_name=Animation',
-    movies: ANIMES_MOVIES,
-  },
-  {
-    id: 'vj-junior',
-    title: 'Vj Junior',
-    punctuality: '',
-    endpoint: '/grid?pipe_type=vj&pipe_id=1&page_name=Vj+Junior',
-    movies: VJ_JUNIOR_EXCLUSIVES,
-  },
-];
-
-
 
 export const NEW_UPLOADS_LIST: Movie[] = [
   {
@@ -886,8 +855,8 @@ export const NEW_UPLOADS_LIST: Movie[] = [
     fileSize: '658.43 MB',
     rating: '16+',
     narration: 'English to Luganda',
-    description: 'A story about a man who has been pointed out as the culprit of a locked-room murder and his lawyer a ...',
-    posterUrl: '',
+    description: 'A story about a man who has been pointed out as the culprit of a locked-room murder and his lawyer digging into the truth.',
+    posterUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -902,8 +871,8 @@ export const NEW_UPLOADS_LIST: Movie[] = [
     uploadedTimeAgo: '8 hrs ago',
     punctuality: 'On-Time',
     endpoint: '/watch?id=masterplan',
-    description: "A master thief enlists two strangers for a Louvre heist targeting the Mona Lisa, then reveals they're ...",
-    posterUrl: '',
+    description: "A master thief enlists two strangers for a Louvre heist targeting the Mona Lisa, then reveals their secret bond.",
+    posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -918,8 +887,8 @@ export const NEW_UPLOADS_LIST: Movie[] = [
     uploadedTimeAgo: '16 hrs ago',
     punctuality: 'On-Time',
     endpoint: '/watch?id=love-of-your-life',
-    description: 'Maya, a smart, wry nurse, is swept up in an immersive love, that sets her life on a trajectory she n ...',
-    posterUrl: '',
+    description: 'Maya, a smart, wry nurse, is swept up in an immersive love, that sets her life on a trajectory she never would have imagined.',
+    posterUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -934,8 +903,8 @@ export const NEW_UPLOADS_LIST: Movie[] = [
     uploadedTimeAgo: 'Yesterday',
     punctuality: 'Bi-Weekly',
     endpoint: '/grid?pipe_type=g&pipe_id=3&page_name=Series',
-    description: 'Maeve and Conrad go to the dogs, leaving Harry to deal with the messy fallout. Jan makes a startling ...',
-    posterUrl: '',
+    description: 'Maeve and Conrad go to the dogs, leaving Harry to deal with the messy fallout.',
+    posterUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -950,8 +919,8 @@ export const NEW_UPLOADS_LIST: Movie[] = [
     uploadedTimeAgo: '2 days ago',
     punctuality: 'Completed Series',
     endpoint: '/grid?pipe_type=g&pipe_id=3&page_name=Series',
-    description: 'An action drama in which a niece who lost her parents and grew up in the hands of an uncle who runs ...',
-    posterUrl: '',
+    description: 'An action drama in which a niece who lost her parents and grew up in the hands of an uncle who runs a clandestine web portal.',
+    posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -967,7 +936,7 @@ export const NEW_UPLOADS_LIST: Movie[] = [
     punctuality: 'On Schedule',
     endpoint: '/watch?id=sardar',
     description: 'A spy, who is estranged from his family due to a mission, suddenly meets his police officer son.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   },
   {
@@ -982,10 +951,55 @@ export const NEW_UPLOADS_LIST: Movie[] = [
     uploadedTimeAgo: '3 days ago',
     punctuality: 'Mon & Thu Drops',
     endpoint: '/watch?id=zhan-zhao',
-    description: 'Huo Ling Long flees an arranged marriage. She meets wounded Zhan Zhao, harboring evidence against a ...',
-    posterUrl: '',
+    description: 'Huo Ling Long flees an arranged marriage. She meets wounded Zhan Zhao, harboring evidence against a corrupt general.',
+    posterUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80',
     isLocked: false,
   }
+];
+
+export const CATEGORIES_AT_LARGE: MovieCategory[] = [
+  {
+    id: 'action',
+    title: 'Action',
+    punctuality: 'Updated Daily',
+    endpoint: '/grid?pipe_type=g&pipe_id=1&page_name=Action',
+    movies: ACTION_MOVIES,
+  },
+  {
+    id: 'horror',
+    title: 'Horror',
+    punctuality: 'Daily Midnight Drops',
+    endpoint: '/grid?pipe_type=g&pipe_id=2&page_name=Horror',
+    movies: HORROR_MOVIES,
+  },
+  {
+    id: 'series',
+    title: 'Series',
+    punctuality: 'Bi-Weekly Releases',
+    endpoint: '/grid?pipe_type=g&pipe_id=3&page_name=Series',
+    movies: TV_SERIES_MOVIES,
+  },
+  {
+    id: 'kungfu',
+    title: 'Kungu Fu',
+    punctuality: 'Weekend Special',
+    endpoint: '/grid?pipe_type=g&pipe_id=11&page_name=Kungu+Fu',
+    movies: KUNGFU_MOVIES,
+  },
+  {
+    id: 'animation',
+    title: 'Animation',
+    punctuality: 'Weekly Sundays',
+    endpoint: '/grid?pipe_type=g&pipe_id=15&page_name=Animation',
+    movies: ANIMES_MOVIES,
+  },
+  {
+    id: 'vj-junior',
+    title: 'Vj Junior',
+    punctuality: 'Exclusive Drops',
+    endpoint: '/grid?pipe_type=vj&pipe_id=1&page_name=Vj+Junior',
+    movies: VJ_JUNIOR_EXCLUSIVES,
+  },
 ];
 
 export const ALL_MOVIES_FOR_SEARCH: Movie[] = [
@@ -1002,7 +1016,6 @@ export const ALL_MOVIES_FOR_SEARCH: Movie[] = [
   ...VJ_JUNIOR_EXCLUSIVES,
   ...DOWNLOADED_MOVIES,
 ];
-
 
 export const VEEJAYS_LIST: Veejay[] = [
   { id: 'vj-junior', name: 'Vj Junior', movieCount: 240, endpoint: '/grid?pipe_type=vj&pipe_id=1&page_name=Vj+Junior' },

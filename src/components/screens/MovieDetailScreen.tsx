@@ -13,6 +13,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { Movie } from '../../types';
+import { MoviePoster } from '../common/MoviePoster';
 
 interface MovieDetailScreenProps {
   movie: Movie;
@@ -20,6 +21,8 @@ interface MovieDetailScreenProps {
   isSaved: boolean;
   onToggleSave: (movie: Movie) => void;
   onMovieClick: (movie: Movie) => void;
+  onPlayMovie: (movie: Movie) => void;
+  onDownloadMovie: (movie: Movie) => void;
   onSearchClick: () => void;
   onCastClick: () => void;
   onNotificationsClick: () => void;
@@ -34,7 +37,7 @@ export const YOU_MAY_ALSO_LIKE_LIST: Movie[] = [
     genre: 'Drama',
     duration: '01h 49m',
     description: 'A young African-American poet navigates love, grief, and self-discovery on a road trip across California.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=600&q=80',
     isLocked: true,
   },
   {
@@ -44,7 +47,7 @@ export const YOU_MAY_ALSO_LIKE_LIST: Movie[] = [
     genre: 'Drama',
     duration: '01h 43m',
     description: 'Four former best friends reunite to complete a bucket list before graduation, discovering old bonds and hidden truths.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=600&q=80',
     isLocked: true,
   },
   {
@@ -54,7 +57,7 @@ export const YOU_MAY_ALSO_LIKE_LIST: Movie[] = [
     genre: 'Thriller',
     duration: '01h 38m',
     description: 'A dangerous femme fatale pulls an undercover agent into an underworld conspiracy with deadly stakes.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
     isLocked: true,
   },
   {
@@ -64,7 +67,7 @@ export const YOU_MAY_ALSO_LIKE_LIST: Movie[] = [
     genre: 'Dance / Musical',
     duration: '01h 40m',
     description: 'Underdog street dancers from different worlds unite to conquer the global underground dance battle arena.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80',
     isLocked: true,
   },
 ];
@@ -77,7 +80,7 @@ export const ACTION_ROW_LIST: Movie[] = [
     genre: 'Action',
     duration: '01h 55m',
     description: 'High-octane desert convoy warfare with modified armored transports.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?auto=format&fit=crop&w=600&q=80',
     isLocked: true,
   },
   {
@@ -87,7 +90,7 @@ export const ACTION_ROW_LIST: Movie[] = [
     genre: 'Action',
     duration: '01h 38m',
     description: 'Relentless tactical siege tests human survival limits.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80',
     isLocked: true,
   },
   {
@@ -97,7 +100,7 @@ export const ACTION_ROW_LIST: Movie[] = [
     genre: 'Action',
     duration: '02h 05m',
     description: 'Rebel fighters take sword in hand against an oppressive dynasty.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?auto=format&fit=crop&w=600&q=80',
     isLocked: true,
   },
   {
@@ -106,8 +109,9 @@ export const ACTION_ROW_LIST: Movie[] = [
     vj: 'Vj Ice P',
     genre: 'Action',
     duration: '01h 27m',
+    fileSize: '867 MB',
     description: 'A classified intelligence agent meets his upright police officer son.',
-    posterUrl: '',
+    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
     isLocked: true,
   },
 ];
@@ -118,6 +122,8 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
   isSaved,
   onToggleSave,
   onMovieClick,
+  onPlayMovie,
+  onDownloadMovie,
   onSearchClick,
   onCastClick,
   onNotificationsClick,
@@ -133,35 +139,34 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
     } else {
       setLikes(likes + 1);
       setHasLiked(true);
+      if (onShowToast) onShowToast('Liked! Added to favorites');
     }
   };
 
   const handleDownloadClick = () => {
-    if (onShowToast) {
-      onShowToast(`Downloading ${movie.title} (${movie.fileSize || '1.5 GB'}) with ${movie.vj}...`);
-    }
+    onDownloadMovie(movie);
   };
 
   return (
-    <div className="min-h-full bg-[#05051F] text-white flex flex-col pb-24 select-none">
+    <div className="min-h-full bg-[#05051F] text-white flex flex-col pb-24 select-none animate-fadeIn">
       {/* Top Header matching Screenshots 11 & 13 */}
       <div className="h-14 px-4 flex items-center justify-between sticky top-0 bg-[#05051F]/90 backdrop-blur-md z-30 border-b border-white/[0.04]">
         <button
           onClick={onBack}
-          className="p-1 -ml-1 text-white hover:text-white/80 transition-colors focus:outline-none"
+          className="p-1 -ml-1 text-white hover:text-[#00D522] transition-colors focus:outline-none cursor-pointer"
           aria-label="Back"
         >
           <ArrowLeft className="w-6 h-6 stroke-[2.2]" />
         </button>
 
         <div className="flex items-center space-x-3.5">
-          <button onClick={onCastClick} className="p-1 text-white hover:opacity-80">
+          <button onClick={onCastClick} className="p-1 text-white hover:opacity-80 cursor-pointer">
             <Cast className="w-[20px] h-[20px] stroke-[2]" />
           </button>
-          <button onClick={onNotificationsClick} className="p-1 text-white hover:opacity-80">
+          <button onClick={onNotificationsClick} className="p-1 text-white hover:opacity-80 cursor-pointer">
             <Bell className="w-[20px] h-[20px] stroke-[2]" />
           </button>
-          <button onClick={onSearchClick} className="p-1 text-white hover:opacity-80">
+          <button onClick={onSearchClick} className="p-1 text-white hover:opacity-80 cursor-pointer">
             <Search className="w-[20px] h-[20px] stroke-[2]" />
           </button>
         </div>
@@ -169,25 +174,22 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
 
       {/* Hero Visual Area with Centered Poster and Green Play Button (Screenshots 11 & 13) */}
       <div className="relative w-full pt-3 pb-4 px-4 flex flex-col items-center bg-gradient-to-b from-[#07072C] to-[#05051F]">
-        {/* Poster Card */}
-        <div className="relative w-[185px] aspect-[2/2.8] rounded-md overflow-hidden shadow-2xl bg-[#111128]">
-          {movie.posterUrl && (
-            <img
-              src={movie.posterUrl}
-              alt={movie.title}
-              className="w-full h-full object-cover"
-            />
-          )}
-
-          {/* Lock icon badge top left */}
-          {movie.isLocked && (
-            <div className="absolute top-2 left-2 bg-black/60 p-1 rounded">
-              <Lock className="w-3.5 h-3.5 text-white" />
-            </div>
-          )}
+        {/* Poster Card with Centered Large Green Play Button */}
+        <div
+          onClick={() => onPlayMovie(movie)}
+          className="relative w-[185px] aspect-[2/2.8] rounded-md overflow-hidden shadow-2xl bg-[#111128] cursor-pointer group"
+        >
+          <MoviePoster
+            src={movie.posterUrl}
+            alt={movie.title}
+            title={movie.title}
+            vj={movie.vj}
+            isLocked={movie.isLocked}
+            aspectRatio="aspect-[2/2.8]"
+          />
 
           {/* Centered Large Green Play Button matching Screenshots 11 & 13 */}
-          <div className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-[#00D522] flex items-center justify-center shadow-[0_0_20px_rgba(0,213,34,0.6)]">
+          <div className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-[#00D522] group-hover:bg-[#02ec27] group-hover:scale-110 flex items-center justify-center shadow-[0_0_24px_rgba(0,213,34,0.7)] transition-all z-20">
             <Play className="w-7 h-7 text-white fill-white ml-0.5" />
           </div>
         </div>
@@ -201,7 +203,7 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
         </h1>
 
         {/* Metadata Row: Genre: Action   Vj Junior   Duration: 01h 41m */}
-        <div className="mt-2 flex items-center justify-center space-x-3 text-[13px]">
+        <div className="mt-2 flex items-center justify-center space-x-3 text-[13px] flex-wrap">
           <span className="text-[#D0D0D8]">
             Genre: <strong className="text-white font-semibold">{movie.genre.split('/')[0].trim()}</strong>
           </span>
@@ -217,13 +219,13 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
         <div className="mt-4">
           <button
             onClick={handleDownloadClick}
-            className="w-full py-3 px-5 rounded bg-white hover:bg-neutral-100 text-[#05051F] font-semibold text-[15px] flex items-center justify-between shadow-md transition-all active:scale-[0.99] focus:outline-none"
+            className="w-full py-3 px-5 rounded bg-white hover:bg-neutral-100 text-[#05051F] font-semibold text-[15px] flex items-center justify-between shadow-md transition-all active:scale-[0.99] focus:outline-none cursor-pointer"
           >
             <div className="w-6 flex items-center justify-start text-[#9292A5]">
               <Lock className="w-4 h-4 text-[#9292A5]" />
             </div>
             <span className="text-[#05051F] font-bold text-[16px]">
-              Download
+              Download ({movie.fileSize || '1.5 GB'})
             </span>
             <div className="w-6 flex items-center justify-end text-[#00D522]">
               <Download className="w-5 h-5 text-[#00D522] stroke-[2.5]" />
@@ -256,8 +258,13 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
         <div className="mt-6 py-3 px-6 flex items-center justify-around border-t border-b border-white/[0.06]">
           {/* Add MyList */}
           <button
-            onClick={() => onToggleSave(movie)}
-            className="flex flex-col items-center space-y-1 text-white hover:text-white/80 transition-colors focus:outline-none"
+            onClick={() => {
+              onToggleSave(movie);
+              if (onShowToast) {
+                onShowToast(isSaved ? 'Removed from MyList' : 'Added to MyList!');
+              }
+            }}
+            className="flex flex-col items-center space-y-1 text-white hover:text-white/80 transition-colors focus:outline-none cursor-pointer"
           >
             {isSaved ? (
               <Check className="w-5 h-5 text-[#00D522] stroke-[2.5]" />
@@ -272,7 +279,7 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
           {/* Like */}
           <button
             onClick={handleLike}
-            className={`flex flex-col items-center space-y-1 transition-colors focus:outline-none ${
+            className={`flex flex-col items-center space-y-1 transition-colors focus:outline-none cursor-pointer ${
               hasLiked ? 'text-[#00D522]' : 'text-white'
             }`}
           >
@@ -281,15 +288,16 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
                 <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" />
               </svg>
             </div>
-            <span className="text-[12px] font-medium">Like</span>
+            <span className="text-[12px] font-medium">Like ({likes})</span>
           </button>
 
           {/* Share */}
           <button
             onClick={() => {
+              navigator.clipboard?.writeText?.(window.location.href);
               if (onShowToast) onShowToast('Link copied to clipboard!');
             }}
-            className="flex flex-col items-center space-y-1 text-white hover:text-white/80 transition-colors focus:outline-none"
+            className="flex flex-col items-center space-y-1 text-white hover:text-white/80 transition-colors focus:outline-none cursor-pointer"
           >
             <Share2 className="w-5 h-5 stroke-[2.2]" />
             <span className="text-[12px] font-medium">Share</span>
@@ -308,14 +316,15 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
             <div
               key={m.id}
               onClick={() => onMovieClick(m)}
-              className="flex-shrink-0 w-[110px] aspect-[2/3] rounded-lg overflow-hidden bg-[#111128] relative cursor-pointer"
+              className="flex-shrink-0 w-[110px] cursor-pointer"
             >
-              {m.posterUrl && <img src={m.posterUrl} alt={m.title} className="w-full h-full object-cover" />}
-              {m.isLocked && (
-                <div className="absolute top-1 left-1 bg-black/60 p-0.5 rounded">
-                  <Lock className="w-3 h-3 text-white" />
-                </div>
-              )}
+              <MoviePoster
+                src={m.posterUrl}
+                alt={m.title}
+                title={m.title}
+                vj={m.vj}
+                isLocked={m.isLocked}
+              />
             </div>
           ))}
         </div>
@@ -332,14 +341,15 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
             <div
               key={m.id}
               onClick={() => onMovieClick(m)}
-              className="flex-shrink-0 w-[110px] aspect-[2/3] rounded-lg overflow-hidden bg-[#111128] relative cursor-pointer"
+              className="flex-shrink-0 w-[110px] cursor-pointer"
             >
-              {m.posterUrl && <img src={m.posterUrl} alt={m.title} className="w-full h-full object-cover" />}
-              {m.isLocked && (
-                <div className="absolute top-1 left-1 bg-black/60 p-0.5 rounded">
-                  <Lock className="w-3 h-3 text-white" />
-                </div>
-              )}
+              <MoviePoster
+                src={m.posterUrl}
+                alt={m.title}
+                title={m.title}
+                vj={m.vj}
+                isLocked={m.isLocked}
+              />
             </div>
           ))}
         </div>

@@ -15,13 +15,17 @@ import {
   KUNGFU_MOVIES,
   ANIMES_MOVIES,
   VJ_JUNIOR_EXCLUSIVES,
+  DOWNLOADED_MOVIES,
+  ALL_MOVIES_FOR_SEARCH,
 } from './data/mockData';
+import { getCategoryGridMovies } from './data/categoryMoviesData';
 import { BottomNav } from './components/common/BottomNav';
 import { FeaturedHero } from './components/home/FeaturedHero';
 import { PosterRow } from './components/home/PosterRow';
 import { ContinueWatchingRow } from './components/home/ContinueWatchingRow';
 import { MovieDetailScreen, YOU_MAY_ALSO_LIKE_LIST } from './components/screens/MovieDetailScreen';
 import { CategoriesScreen } from './components/screens/CategoriesScreen';
+import { CategoryDetailScreen } from './components/screens/CategoryDetailScreen';
 import { SavedScreen } from './components/screens/SavedScreen';
 import { MenuScreen } from './components/screens/MenuScreen';
 import { SearchScreen } from './components/screens/SearchScreen';
@@ -31,38 +35,90 @@ import { ShowsScreen } from './components/screens/ShowsScreen';
 import { RecentlyWatchedScreen } from './components/screens/RecentlyWatchedScreen';
 import { DownloadsScreen } from './components/screens/DownloadsScreen';
 import { SettingsScreen } from './components/screens/SettingsScreen';
+import { AccountScreen } from './components/screens/AccountScreen';
 import { SupportScreen } from './components/screens/SupportScreen';
+import { AdminDashboardScreen } from './components/screens/AdminDashboardScreen';
+import { AvatarPickerScreen } from './components/screens/AvatarPickerScreen';
 import { PhoneSimulator } from './components/phone/PhoneSimulator';
+import { VideoPlayerModal } from './components/common/VideoPlayerModal';
+import { Toast } from './components/common/Toast';
 import { fetchDashboardData } from './services/api';
 
 export default function App() {
-  const [activeScreen, setActiveScreen] = useState<ViewScreen>('home');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('munowatch_auth') === 'true';
+  });
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
+    return localStorage.getItem('munowatch_is_admin') === 'true';
+  });
+  const [userName, setUserName] = useState<string>(() => {
+    return localStorage.getItem('munowatch_user_name') || 'Ashiraf Mutagwanya';
+  });
+  const [userEmail, setUserEmail] = useState<string>(() => {
+    return localStorage.getItem('munowatch_user_email') || 'mutagwanyaashiraf@gmail.com';
+  });
+  const [userAvatar, setUserAvatar] = useState<string>(() => {
+    return localStorage.getItem('munomovies_avatar') || '';
+  });
+
+  // Display sign up/in screen immediately on first launch if not authenticated
+  const [activeScreen, setActiveScreen] = useState<ViewScreen>(() => {
+    return localStorage.getItem('munowatch_auth') === 'true' ? 'home' : 'login';
+  });
   const [currentTab, setCurrentTab] = useState<ActiveTab>('home');
   const [heroMovies, setHeroMovies] = useState<Movie[]>(FEATURED_HERO_MOVIES);
   const [latestMovies, setLatestMovies] = useState<Movie[]>(LATEST_ON_MUNOWATCH);
+  const [continueWatchingMovies, setContinueWatchingMovies] = useState<Movie[]>(CONTINUE_WATCHING_LIST);
   const [actionMovies, setActionMovies] = useState<Movie[]>(ACTION_MOVIES);
   const [horrorMovies, setHorrorMovies] = useState<Movie[]>(HORROR_MOVIES);
   const [seriesMovies, setSeriesMovies] = useState<Movie[]>(TV_SERIES_MOVIES);
   const [kungfuMovies, setKungfuMovies] = useState<Movie[]>(KUNGFU_MOVIES);
   const [animationMovies, setAnimationMovies] = useState<Movie[]>(ANIMES_MOVIES);
   const [vjJuniorMovies, setVjJuniorMovies] = useState<Movie[]>(VJ_JUNIOR_EXCLUSIVES);
-  const [selectedMovie, setSelectedMovie] = useState<Movie>(LATEST_ON_MUNOWATCH[2]); // "Love of Your Life"
-  const [savedMovies, setSavedMovies] = useState<Movie[]>([]); // Starts empty matching Screenshot 1
+  const [selectedMovie, setSelectedMovie] = useState<Movie>(LATEST_ON_MUNOWATCH[2] || FEATURED_HERO_MOVIES[0]);
+  const [savedMovies, setSavedMovies] = useState<Movie[]>([]);
+  const [downloadedMovies, setDownloadedMovies] = useState<Movie[]>(DOWNLOADED_MOVIES);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [playingMovie, setPlayingMovie] = useState<Movie | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleUpdateProfile = (name: string, avatar: string) => {
+    setUserName(name);
+    setUserAvatar(avatar);
+    localStorage.setItem('munowatch_user_name', name);
+    localStorage.setItem('munomovies_avatar', avatar);
+  };
+
+  // Selected Category & Movies for CategoryDetailScreen
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>('Action');
+  const [selectedCategoryType, setSelectedCategoryType] = useState<'genre' | 'veejay'>('genre');
+  const [selectedCategoryMovies, setSelectedCategoryMovies] = useState<Movie[]>(ACTION_MOVIES);
+  const [categoryReturnScreen, setCategoryReturnScreen] = useState<ViewScreen>('categories');
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage(null);
+    }, 2800);
+  };
 
   React.useEffect(() => {
-    fetchDashboardData().then(data => {
-      if (data.heroMovies?.length) setHeroMovies(data.heroMovies.map((m: Movie) => ({ ...m, isLocked: false })));
-      if (data.latestMovies?.length) setLatestMovies(data.latestMovies.map((m: Movie) => ({ ...m, isLocked: false })));
-      if (data.actionMovies?.length) setActionMovies(data.actionMovies.map((m: Movie) => ({ ...m, isLocked: false })));
-      if (data.horrorMovies?.length) setHorrorMovies(data.horrorMovies.map((m: Movie) => ({ ...m, isLocked: false })));
-      if (data.seriesMovies?.length) setSeriesMovies(data.seriesMovies.map((m: Movie) => ({ ...m, isLocked: false })));
-      if (data.kungfuMovies?.length) setKungfuMovies(data.kungfuMovies.map((m: Movie) => ({ ...m, isLocked: false })));
-      if (data.animationMovies?.length) setAnimationMovies(data.animationMovies.map((m: Movie) => ({ ...m, isLocked: false })));
-      if (data.vjJuniorMovies?.length) setVjJuniorMovies(data.vjJuniorMovies.map((m: Movie) => ({ ...m, isLocked: false })));
-    }).catch(err => {
-      console.log('Using synchronized local catalog:', err);
+    fetchDashboardData().then((data) => {
+      if (data) {
+        if (data.heroMovies?.length) setHeroMovies(data.heroMovies);
+        if (data.latestMovies?.length) setLatestMovies(data.latestMovies);
+        if (data.actionMovies?.length) setActionMovies(data.actionMovies);
+        if (data.horrorMovies?.length) setHorrorMovies(data.horrorMovies);
+        if (data.seriesMovies?.length) setSeriesMovies(data.seriesMovies);
+        if (data.kungfuMovies?.length) setKungfuMovies(data.kungfuMovies);
+        if (data.animationMovies?.length) setAnimationMovies(data.animationMovies);
+        if (data.vjJuniorMovies?.length) setVjJuniorMovies(data.vjJuniorMovies);
+        // Use latestMovies as fallback for "continue watching" since it's just "any movie"
+        setContinueWatchingMovies(data.latestMovies);
+      }
     });
   }, []);
 
@@ -72,10 +128,9 @@ export default function App() {
   const dragYInfo = useRef({ startY: 0, scrollTop: 0, hasMoved: false });
 
   const handleScrollMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return; // Only primary mouse button
+    if (e.button !== 0) return;
     const target = e.target as HTMLElement;
-    // Don't intercept clicks on buttons or search inputs
-    if (target.closest('button, input, a, select')) return;
+    if (target.closest('button, input, a, select, video')) return;
 
     if (!scrollContainerRef.current) return;
     isDraggingY.current = true;
@@ -121,8 +176,7 @@ export default function App() {
       dragYInfo.current.hasMoved = false;
       return;
     }
-    setSelectedMovie(movie);
-    setActiveScreen('detail');
+    setPlayingMovie(movie);
   };
 
   const handleToggleSave = (movie: Movie) => {
@@ -138,22 +192,57 @@ export default function App() {
 
   const handleRemoveSaved = (movieId: string) => {
     setSavedMovies((prev) => prev.filter((m) => m.id !== movieId));
+    showToast('Removed from MyList');
   };
 
-  const handleSelectCategory = (name: string) => {
-    setSearchQuery(name);
-    setActiveScreen('search');
+  const handleDownloadMovie = (movie: Movie) => {
+    setDownloadedMovies((prev) => {
+      if (prev.some((m) => m.id === movie.id)) {
+        showToast(`${movie.title} is already downloaded`);
+        return prev;
+      }
+      showToast(`Downloaded ${movie.title} for offline viewing!`);
+      return [{ ...movie, fileSize: movie.fileSize || '1.45 GB' }, ...prev];
+    });
   };
 
-  const currentHeroMovie = heroMovies[0] || FEATURED_HERO_MOVIES[0]; // "Omuzigo" from Screenshot 12
+  const handleDeleteDownload = (movieId: string) => {
+    setDownloadedMovies((prev) => prev.filter((m) => m.id !== movieId));
+    showToast('Download deleted');
+  };
+
+  const handleSelectCategory = (
+    name: string,
+    type: 'genre' | 'veejay' = 'genre',
+    returnTo: ViewScreen = 'categories'
+  ) => {
+    setSelectedCategoryName(name);
+    setSelectedCategoryType(type);
+    setCategoryReturnScreen(returnTo);
+    const movies = getCategoryGridMovies(name, type);
+    setSelectedCategoryMovies(movies);
+    setActiveScreen('category_view');
+  };
+
+  const handleProgressUpdate = (movieId: string, progressPercent: number) => {
+    setContinueWatchingMovies((prev) => {
+      const existing = prev.find((m) => m.id === movieId);
+      if (existing) {
+        return prev.map((m) =>
+          m.id === movieId ? { ...m, progressPercent } : m
+        );
+      }
+      const full = ALL_MOVIES_FOR_SEARCH.find((m) => m.id === movieId);
+      if (full) {
+        return [{ ...full, progressPercent }, ...prev];
+      }
+      return prev;
+    });
+  };
 
   return (
     <PhoneSimulator>
-      {/* 
-        Scrollable Container (.scroll-container):
-        Smoothly scrolls through all categories while BottomNav is permanently fixed at the bottom!
-        Supports both natural mobile touch scrolling and desktop drag/wheel scrolling.
-      */}
+      {/* Scrollable Container */}
       <div
         ref={scrollContainerRef}
         onMouseDown={handleScrollMouseDown}
@@ -162,96 +251,86 @@ export default function App() {
         onMouseLeave={handleScrollMouseUp}
         className="flex-1 overflow-y-auto scroll-container min-h-0 relative bg-[#05051F]"
       >
-        {/* 1. HOME SCREEN (Screenshot 12) */}
+        {/* 1. HOME SCREEN */}
         {activeScreen === 'home' && (
           <div className="flex flex-col pb-24">
-            {/* Featured Hero Banner with Top Header inside (Screenshot 12) */}
             <FeaturedHero
-              movie={currentHeroMovie}
+              movies={heroMovies}
               onSearchClick={() => {
                 setSearchQuery('');
                 setActiveScreen('search');
               }}
-              onCastClick={() => {}}
+              onCastClick={() => showToast('Searching for Chromecast & AirPlay devices...')}
               onNotificationsClick={() => setActiveScreen('new_uploads')}
               onWatchNowClick={handleWatchNow}
               onMovieClick={handleMovieClick}
             />
 
-            {/* Latest on Munowatch (Screenshot 12) */}
             <PosterRow
-              title="Latest on Munowatch"
+              title="Latest on MunoMovies"
               movies={latestMovies}
-              onArrowClick={() => setActiveScreen('new_uploads')}
+              onArrowClick={() => handleSelectCategory('Latest on MunoMovies', 'genre', 'home')}
               onMovieClick={handleMovieClick}
             />
 
-            {/* Continue watching (Screenshot 12) */}
             <ContinueWatchingRow
-              movies={CONTINUE_WATCHING_LIST}
+              movies={continueWatchingMovies}
               onArrowClick={() => setActiveScreen('recently_watched')}
               onMovieClick={handleMovieClick}
             />
 
-            {/* You may also like (Screenshots 11 & 13) */}
             <PosterRow
               title="You may also like"
               movies={YOU_MAY_ALSO_LIKE_LIST}
-              onArrowClick={() => setActiveScreen('search')}
+              onArrowClick={() => handleSelectCategory('You May Also Like', 'genre', 'home')}
               onMovieClick={handleMovieClick}
             />
 
-            {/* Action (Screenshots 11 & 13) */}
             <PosterRow
               title="Action"
               movies={actionMovies}
-              onArrowClick={() => setActiveScreen('search')}
+              onArrowClick={() => handleSelectCategory('Action', 'genre', 'home')}
               onMovieClick={handleMovieClick}
             />
 
-            {/* Horror (Screenshot 7) */}
             <PosterRow
               title="Horror"
               movies={horrorMovies}
-              onArrowClick={() => setActiveScreen('search')}
+              onArrowClick={() => handleSelectCategory('Horror', 'genre', 'home')}
               onMovieClick={handleMovieClick}
             />
 
-            {/* Series (Screenshot 7 & 15) */}
             <PosterRow
               title="Series"
               movies={seriesMovies}
-              onArrowClick={() => setActiveScreen('shows')}
+              onArrowClick={() => handleSelectCategory('Series', 'genre', 'home')}
               onMovieClick={handleMovieClick}
             />
 
-            {/* Kungu Fu (Screenshot 7) */}
             <PosterRow
               title="Kungu Fu"
               movies={kungfuMovies}
-              onArrowClick={() => setActiveScreen('search')}
+              onArrowClick={() => handleSelectCategory('Kungu Fu', 'genre', 'home')}
               onMovieClick={handleMovieClick}
             />
 
-            {/* Animation (Screenshot 7) */}
             <PosterRow
               title="Animation"
               movies={animationMovies}
-              onArrowClick={() => setActiveScreen('search')}
+              onArrowClick={() => handleSelectCategory('Animation', 'genre', 'home')}
               onMovieClick={handleMovieClick}
             />
 
-            {/* Vj Junior (Screenshot 6) */}
             <PosterRow
-              title="Vj Junior"
+              title="Vj Junior Exclusives"
               movies={vjJuniorMovies}
-              onArrowClick={() => setActiveScreen('new_uploads')}
+              onArrowClick={() => handleSelectCategory('Vj Junior', 'veejay', 'home')}
               onMovieClick={handleMovieClick}
             />
           </div>
         )}
 
-        {/* 2. MOVIE DETAIL SCREEN (Screenshots 11 & 13) */}
+        {/* 2. MOVIE DETAIL SCREEN */}
         {activeScreen === 'detail' && (
           <MovieDetailScreen
             movie={selectedMovie}
@@ -259,27 +338,45 @@ export default function App() {
             isSaved={savedMovies.some((m) => m.id === selectedMovie.id)}
             onToggleSave={handleToggleSave}
             onMovieClick={handleMovieClick}
+            onPlayMovie={handleWatchNow}
+            onDownloadMovie={handleDownloadMovie}
             onSearchClick={() => setActiveScreen('search')}
-            onCastClick={() => {}}
+            onCastClick={() => showToast('Cast device connected')}
             onNotificationsClick={() => setActiveScreen('new_uploads')}
+            onShowToast={showToast}
           />
         )}
 
-        {/* 3. CATEGORIES SCREEN (Screenshots 6 & 7) */}
+        {/* 3. CATEGORIES SCREEN (Genre & Veejay Tabs) */}
         {activeScreen === 'categories' && (
           <CategoriesScreen
             onBack={() => {
               setActiveScreen('home');
               setCurrentTab('home');
             }}
-            onSelectCategory={handleSelectCategory}
+            onSelectCategory={(name, type) => handleSelectCategory(name, type, 'categories')}
+            onMovieClick={handleMovieClick}
             onSearchClick={() => setActiveScreen('search')}
-            onCastClick={() => {}}
+            onCastClick={() => showToast('Scanning for TV screens...')}
             onNotificationsClick={() => setActiveScreen('new_uploads')}
           />
         )}
 
-        {/* 4. SAVED SCREEN (Screenshot 1) */}
+        {/* 4. CATEGORY DETAIL SCREEN */}
+        {activeScreen === 'category_view' && (
+          <CategoryDetailScreen
+            categoryTitle={selectedCategoryName}
+            categoryType={selectedCategoryType}
+            movies={selectedCategoryMovies}
+            onBack={() => setActiveScreen(categoryReturnScreen || 'categories')}
+            onMovieClick={handleMovieClick}
+            onSearchClick={() => setActiveScreen('search')}
+            onCastClick={() => showToast('Scanning for TV screens...')}
+            onNotificationsClick={() => setActiveScreen('new_uploads')}
+          />
+        )}
+
+        {/* 5. SAVED SCREEN */}
         {activeScreen === 'saved' && (
           <SavedScreen
             savedMovies={savedMovies}
@@ -294,12 +391,12 @@ export default function App() {
               setCurrentTab('home');
             }}
             onSearchClick={() => setActiveScreen('search')}
-            onCastClick={() => {}}
+            onCastClick={() => showToast('Scanning for TV screens...')}
             onNotificationsClick={() => setActiveScreen('new_uploads')}
           />
         )}
 
-        {/* 5. APP MENU SCREEN (Screenshot 3) */}
+        {/* 6. APP MENU SCREEN */}
         {activeScreen === 'menu' && (
           <MenuScreen
             onClose={() => {
@@ -307,100 +404,197 @@ export default function App() {
               setCurrentTab('home');
             }}
             onNavigate={(screen) => setActiveScreen(screen)}
-            onLogout={() => setActiveScreen('login')}
+            onLogout={() => {
+              setIsAuthenticated(false);
+              setIsAdmin(false);
+              localStorage.removeItem('munowatch_auth');
+              localStorage.removeItem('munowatch_is_admin');
+              setActiveScreen('login');
+              showToast('Signed out of MunoMovies.');
+            }}
             onOpenSupport={() => setIsSupportModalOpen(true)}
+            isAdmin={isAdmin}
           />
         )}
 
-        {/* 6. TV SHOWS SCREEN (Screenshot 15) */}
+        {/* 7. TV SHOWS SCREEN */}
         {activeScreen === 'shows' && (
           <ShowsScreen
             onBack={() => setActiveScreen('home')}
             onMovieClick={handleMovieClick}
             onSearchClick={() => setActiveScreen('search')}
-            onCastClick={() => {}}
+            onCastClick={() => showToast('Cast device connected')}
             onNotificationsClick={() => setActiveScreen('new_uploads')}
           />
         )}
 
-        {/* 7. YOU RECENTLY WATCH... SCREEN (Screenshot 16) */}
+        {/* 8. YOU RECENTLY WATCHED SCREEN */}
         {activeScreen === 'recently_watched' && (
           <RecentlyWatchedScreen
             onBack={() => setActiveScreen('home')}
             onMovieClick={handleMovieClick}
             onSearchClick={() => setActiveScreen('search')}
-            onCastClick={() => {}}
+            onCastClick={() => showToast('Cast device connected')}
             onNotificationsClick={() => setActiveScreen('new_uploads')}
           />
         )}
 
-        {/* 8. MY DOWNLOADS SCREEN (Screenshot 4) */}
+        {/* 9. MY DOWNLOADS SCREEN */}
         {activeScreen === 'downloads' && (
           <DownloadsScreen
+            downloadedMovies={downloadedMovies}
+            onDeleteDownload={handleDeleteDownload}
+            onPlayMovie={handleWatchNow}
+            onExploreClick={() => {
+              setActiveScreen('home');
+              setCurrentTab('home');
+            }}
             onBack={() => setActiveScreen('home')}
             onMovieClick={handleMovieClick}
             onSearchClick={() => setActiveScreen('search')}
-            onCastClick={() => {}}
+            onCastClick={() => showToast('Cast device connected')}
             onNotificationsClick={() => setActiveScreen('new_uploads')}
           />
         )}
 
-        {/* 9. SETTINGS & ACCOUNT SCREEN (Screenshots 9 & 10) */}
-        {activeScreen === 'settings' && (
-          <SettingsScreen
-            onBack={() => setActiveScreen('home')}
-            onLogout={() => setActiveScreen('login')}
+        {/* 10. MY ACCOUNT SCREEN */}
+        {activeScreen === 'account' && (
+          <AccountScreen
+            onBack={() => setActiveScreen('menu')}
+            onLogout={() => {
+              setIsAuthenticated(false);
+              setIsAdmin(false);
+              localStorage.removeItem('munowatch_auth');
+              localStorage.removeItem('munowatch_is_admin');
+              localStorage.removeItem('munowatch_user_name');
+              localStorage.removeItem('munowatch_user_email');
+              setActiveScreen('login');
+              showToast('Signed out successfully.');
+            }}
+            onShowToast={showToast}
+            isAdmin={isAdmin}
+            onOpenAdmin={() => setActiveScreen('admin_dashboard')}
+            userName={userName}
+            userEmail={userEmail}
+            onUpdateProfile={handleUpdateProfile}
+            userAvatar={userAvatar}
+            onOpenAvatarPicker={() => setActiveScreen('avatar_picker')}
           />
         )}
 
-        {/* 10. NEW UPLOADS SCREEN (Screenshot_20261018_110344_Munowatch.jpg) */}
+        {/* 10B. FULL-PAGE AVATAR PICKER SCREEN */}
+        {activeScreen === 'avatar_picker' && (
+          <AvatarPickerScreen
+            onBack={() => setActiveScreen('account')}
+            currentAvatar={userAvatar}
+            onSaveAvatar={(avatarUrl) => {
+              setUserAvatar(avatarUrl);
+              localStorage.setItem('munomovies_avatar', avatarUrl);
+            }}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* 11. SETTINGS SCREEN */}
+        {activeScreen === 'settings' && (
+          <SettingsScreen
+            onBack={() => setActiveScreen('home')}
+            onLogout={() => {
+              setIsAuthenticated(false);
+              setIsAdmin(false);
+              localStorage.removeItem('munowatch_auth');
+              localStorage.removeItem('munowatch_is_admin');
+              setActiveScreen('login');
+            }}
+          />
+        )}
+
+        {/* 12. NEW UPLOADS SCREEN */}
         {(activeScreen === 'notifications' || activeScreen === 'new_uploads') && (
           <NewUploadsScreen
             onBack={() => setActiveScreen('home')}
             onMovieClick={handleMovieClick}
             onSearchClick={() => setActiveScreen('search')}
-            onCastClick={() => {}}
+            onCastClick={() => showToast('Cast device connected')}
             onNotificationsClick={() => {}}
           />
         )}
 
-        {/* 11. SEARCH SCREEN (Screenshot 17) */}
+        {/* 13. SEARCH SCREEN */}
         {activeScreen === 'search' && (
           <SearchScreen
             initialQuery={searchQuery}
             onBack={() => setActiveScreen('home')}
             onMovieClick={handleMovieClick}
-            onCastClick={() => {}}
+            onCastClick={() => showToast('Cast device connected')}
           />
         )}
 
-        {/* 12. LOGIN SCREEN (Screenshot 2) */}
+        {/* 14. LOGIN / SIGN UP SCREEN */}
         {activeScreen === 'login' && (
           <LoginScreen
-            onBack={() => setActiveScreen('home')}
-            onLoginSuccess={() => {
+            onBack={isAuthenticated ? () => setActiveScreen('home') : undefined}
+            isFirstLaunch={!isAuthenticated}
+            onLoginSuccess={(adminFlag = false, name = 'Ashiraf Mutagwanya', email = 'mutagwanyaashiraf@gmail.com') => {
+              setIsAuthenticated(true);
+              setIsAdmin(adminFlag);
+              setUserName(name);
+              setUserEmail(email);
+              localStorage.setItem('munowatch_auth', 'true');
+              localStorage.setItem('munowatch_is_admin', adminFlag ? 'true' : 'false');
+              localStorage.setItem('munowatch_user_name', name);
+              localStorage.setItem('munowatch_user_email', email);
               setActiveScreen('home');
               setCurrentTab('home');
             }}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* 15. ADMIN DASHBOARD SCREEN */}
+        {activeScreen === 'admin_dashboard' && (
+          <AdminDashboardScreen
+            onBack={() => setActiveScreen('account')}
+            onLogout={() => {
+              setIsAuthenticated(false);
+              setIsAdmin(false);
+              localStorage.removeItem('munowatch_auth');
+              localStorage.removeItem('munowatch_is_admin');
+              setActiveScreen('login');
+              showToast('Signed out of Admin Dashboard.');
+            }}
+            onShowToast={showToast}
+            movies={latestMovies}
           />
         )}
       </div>
 
-      {/* Support Action Sheet Modal (Screenshot 8) */}
+      {/* Floating In-App Toast */}
+      <Toast message={toastMessage} />
+
+      {/* Support Action Sheet Modal */}
       {isSupportModalOpen && (
         <SupportScreen
           onBack={() => setIsSupportModalOpen(false)}
+          onShowToast={showToast}
         />
       )}
 
-      {/* 
-        Permanently Fixed Bottom Navigation Bar:
-        Always visible at the bottom of the phone frame matching all screenshots
-      */}
-      {activeScreen !== 'login' && (
+      {/* Video Streaming Player Modal */}
+      {playingMovie && (
+        <VideoPlayerModal
+          movie={playingMovie}
+          onClose={() => setPlayingMovie(null)}
+          onProgressUpdate={handleProgressUpdate}
+        />
+      )}
+
+      {/* Fixed Bottom Navigation Bar */}
+      {activeScreen !== 'login' && !playingMovie && (
         <BottomNav
           currentTab={currentTab}
           onTabChange={handleTabChange}
+          savedCount={savedMovies.length}
         />
       )}
     </PhoneSimulator>

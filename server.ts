@@ -1,218 +1,376 @@
+import 'dotenv/config';
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {
+  FEATURED_HERO_MOVIES,
+  LATEST_ON_MUNOWATCH,
+  ACTION_MOVIES,
+  HORROR_MOVIES,
+  TV_SERIES_MOVIES,
+  KUNGFU_MOVIES,
+  ANIMES_MOVIES,
+  VJ_JUNIOR_EXCLUSIVES,
+  FAVORITES_MOVIES,
+  LAST_EPISODES_WATCHED,
+  DOWNLOADED_MOVIES,
+  NEW_UPLOADS_LIST
+} from './src/data/mockData';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const TMDB_API_KEY = process.env.TMDB_API_KEY || process.env.VITE_TMDB_API_KEY || '';
+const TMDB_READ_TOKEN = process.env.TMDB_READ_TOKEN || '';
+const MOVIE_SERVER_URL = process.env.MOVIE_SERVER_URL || 'https://mumowatch.ai.studio';
+
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
+
+// In-memory cache for TMDB server-side proxy
+const tmdbServerCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 async function startServer() {
   const app = express();
   app.use(express.json());
 
-  // MunoWatch Server API Endpoints fulfilling https://mumowatch.ai.studio/ specification
-  const mockServerCatalog = {
-    heroMovies: [
-      {
-        id: 'omuzigo',
-        title: 'Omuzigo',
-        vj: 'Vj Junior',
-        genre: 'Drama',
-        duration: '01h 50m',
-        fileSize: '1.20 GB',
-        rating: '18+',
-        narration: 'English to Luganda',
-        uploadedTimeAgo: '1 day ago',
-        punctuality: 'Daily 8PM Release',
-        endpoint: '/watch?id=omuzigo',
-        description: 'For James, Omuzigo is more than a place to live. It represents freedom, independence and uncertainty.',
-        posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80',
-        heroBannerUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
-        isLocked: false,
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-      },
-      {
-        id: 'under-water',
-        title: 'Under Water',
-        secondaryLabel: 'Junior',
-        vj: 'Vj Junior',
-        genre: 'Sci-Fi / Thriller',
-        duration: '01h 35m',
-        fileSize: '1.45 GB',
-        rating: '16+',
-        narration: 'English to Luganda',
-        uploadedTimeAgo: '12 hrs ago',
-        punctuality: 'Weekend Special Drop',
-        endpoint: '/watch?id=under-water',
-        description: 'A crew of oceanic researchers work to get to safety after a mysterious earthquake ravages their subterranean facility.',
-        posterUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80',
-        heroBannerUrl: 'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?auto=format&fit=crop&w=1200&q=80',
-        isLocked: false,
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
-      }
-    ],
-    latestMovies: [
-      {
-        id: 'lilian-music',
-        title: 'Lilian on Music, Loss AND HEALING',
-        secondaryLabel: 'Special',
-        vj: 'Vj Emmy',
-        genre: 'Documentary',
-        duration: '01h 15m',
-        fileSize: '950 MB',
-        rating: '13+',
-        narration: 'English to Luganda',
-        uploadedTimeAgo: '4 hrs ago',
-        punctuality: 'Today 4PM',
-        endpoint: '/watch?id=lilian-music',
-        description: 'An intimate documentary delving into musical origins, grieving deep loss, and rediscovering light through sound.',
-        posterUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80',
-        isLocked: false,
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
-      },
-      {
-        id: 'masterplan',
-        title: 'Masterplan',
-        secondaryLabel: 'Junior',
-        vj: 'Vj Junior',
-        genre: 'Crime / Heist',
-        duration: '01h 41m',
-        fileSize: '1.5 GB',
-        rating: '16+',
-        narration: 'English to Luganda',
-        uploadedTimeAgo: '8 hrs ago',
-        punctuality: 'Today 12PM',
-        endpoint: '/watch?id=masterplan',
-        description: 'A master thief enlists two strangers for an audacious Louvre heist targeting high-value royal artifacts.',
-        posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
-        isLocked: false,
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4'
-      },
-      {
-        id: 'love-of-your-life',
-        title: 'Love of Your Life',
-        secondaryLabel: 'Junior',
-        vj: 'Vj Junior',
-        genre: 'Drama',
-        duration: '01h 43m',
-        fileSize: '1.54 GB',
-        rating: '18+',
-        narration: 'English to Luganda',
-        uploadedTimeAgo: '16 hrs ago',
-        punctuality: '16h ago (Punctual)',
-        endpoint: '/watch?id=love-of-your-life',
-        description: 'Maya, a smart nurse, is swept up in an immersive love that sets her life on a trajectory she never imagined.',
-        posterUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
-        heroBannerUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
-        isLocked: false,
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4'
-      },
-      {
-        id: 'sardar',
-        title: 'Sardar 4',
-        secondaryLabel: 'Ice P',
-        vj: 'Vj Ice P',
-        genre: 'Action / Spy',
-        duration: '01h 27m',
-        fileSize: '867.99 MB',
-        rating: '16+',
-        narration: 'English to Luganda',
-        uploadedTimeAgo: '1 day ago',
-        punctuality: '1 day ago',
-        endpoint: '/watch?id=sardar',
-        description: 'A spy, who is estranged from his family due to a classified mission, suddenly meets his upright police officer son.',
-        posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
-        isLocked: false,
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-      },
-      {
-        id: 'matchbox',
-        title: 'Matchbox: The Movie',
-        secondaryLabel: 'Junior',
-        vj: 'Vj Junior',
-        genre: 'Action',
-        duration: '01h 55m',
-        fileSize: '1.65 GB',
-        rating: '13+',
-        narration: 'English to Luganda',
-        uploadedTimeAgo: '2 days ago',
-        punctuality: 'On Schedule',
-        endpoint: '/watch?id=matchbox',
-        description: 'High-octane desert warfare and modified armored transports clash in an all-or-nothing convoy rescue.',
-        posterUrl: 'https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?auto=format&fit=crop&w=600&q=80',
-        isLocked: false,
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
-      },
-      {
-        id: 'fall-2',
-        title: 'Fall 2: Deadpoint',
-        secondaryLabel: 'Junior',
-        vj: 'Vj Junior',
-        genre: 'Survival / Thriller',
-        duration: '01h 48m',
-        fileSize: '1.38 GB',
-        rating: '16+',
-        narration: 'English to Luganda',
-        uploadedTimeAgo: '3 days ago',
-        punctuality: 'On Schedule',
-        endpoint: '/watch?id=fall-2',
-        description: 'Trapped on an overhang 2,000 feet above the alpine clouds with failing carabiners.',
-        posterUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80',
-        isLocked: false,
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
-      }
-    ],
-    categories: ['Action', 'Horror', 'Drama', 'Sci-Fi', 'Animation', 'Vj Junior']
+  // --------------------------------------------------------------------------
+  // SOURCE A: Authoritative Movie Server Catalog & Playable Records
+  // Retains original IDs, server metadata, and video streaming endpoints.
+  // --------------------------------------------------------------------------
+  const serverCatalog = {
+    heroMovies: FEATURED_HERO_MOVIES,
+    latestMovies: LATEST_ON_MUNOWATCH,
+    actionMovies: ACTION_MOVIES,
+    horrorMovies: HORROR_MOVIES,
+    seriesMovies: TV_SERIES_MOVIES,
+    kungfuMovies: KUNGFU_MOVIES,
+    animationMovies: ANIMES_MOVIES,
+    vjJuniorMovies: VJ_JUNIOR_EXCLUSIVES,
+    categories: [
+      'Action', 'Horror', 'Series', 'Adventure', 'Love Story',
+      'Comedy', 'Crime', 'Family', 'Sci FI', 'Romance',
+      'Kungu Fu', 'Drama', 'Sport', 'Thriller', 'Animation'
+    ]
   };
 
-  app.get('/dashboard', async (req, res) => {
-    try {
-      const response = await fetch('https://mumowatch.ai.studio/dashboard');
-      if (response.ok) {
-        const data = await response.json();
-        return res.json(data);
-      }
-    } catch (e) {
-      // fallback to mockServerCatalog
-    }
-    res.json(mockServerCatalog);
+  // Helper: Get all movies flat
+  function getAllServerMovies() {
+    return [
+      ...serverCatalog.heroMovies,
+      ...serverCatalog.latestMovies,
+      ...serverCatalog.actionMovies,
+      ...serverCatalog.horrorMovies,
+      ...serverCatalog.seriesMovies,
+    ];
+  }
+
+  // --------------------------------------------------------------------------
+  // TMDB API PROXY ROUTES (Source B)
+  // Keeps secrets server-side and provides rate-limit protection and caching
+  // --------------------------------------------------------------------------
+
+  // Status check for TMDB credentials
+  app.get('/api/tmdb/status', (req, res) => {
+    const isConfigured = Boolean(TMDB_API_KEY || TMDB_READ_TOKEN);
+    res.json({
+      configured: isConfigured,
+      authType: TMDB_READ_TOKEN ? 'bearer' : TMDB_API_KEY ? 'api_key' : 'none',
+      movieServerUrl: MOVIE_SERVER_URL,
+      message: isConfigured
+        ? 'TMDB integration active with valid credentials.'
+        : 'TMDB_API_KEY is not set in environment. Using verified TMDB mappings and neutral fallbacks.'
+    });
   });
 
-  app.get('/movie/:id', async (req, res) => {
+  // Search TMDB by title with optional year
+  app.get('/api/tmdb/search', async (req, res) => {
+    const { query, year } = req.query;
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ error: 'Missing query parameter' });
+    }
+
+    const cleanQuery = query.trim();
+    const cacheKey = `search_${cleanQuery.toLowerCase()}_${year || 'any'}`;
+
+    const cached = tmdbServerCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      return res.json({ success: true, match: cached.data });
+    }
+
+    if (!TMDB_API_KEY && !TMDB_READ_TOKEN) {
+      return res.json({ success: false, match: null, message: 'TMDB_API_KEY not configured' });
+    }
+
+    try {
+      const url = new URL(`${TMDB_BASE_URL}/search/movie`);
+      url.searchParams.append('query', cleanQuery);
+      url.searchParams.append('include_adult', 'false');
+      if (year && typeof year === 'string') {
+        url.searchParams.append('year', year);
+      }
+      if (TMDB_API_KEY) {
+        url.searchParams.append('api_key', TMDB_API_KEY);
+      }
+
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (TMDB_READ_TOKEN) {
+        headers['Authorization'] = `Bearer ${TMDB_READ_TOKEN}`;
+      }
+
+      const response = await fetch(url.toString(), { headers });
+      if (!response.ok) {
+        return res.status(response.status).json({ error: 'TMDB API request failed' });
+      }
+
+      const json = await response.json();
+      const results: any[] = json.results || [];
+
+      if (results.length === 0) {
+        tmdbServerCache.set(cacheKey, { data: null, timestamp: Date.now() });
+        return res.json({ success: true, match: null });
+      }
+
+      // Conservative Evaluation: Select best match
+      const normQuery = cleanQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
+      let best = results[0];
+
+      for (const candidate of results) {
+        const normTitle = (candidate.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const normOriginal = (candidate.original_title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        
+        // Exact normalized match found
+        if (normTitle === normQuery || normOriginal === normQuery) {
+          best = candidate;
+          break;
+        }
+
+        // Year match boost
+        if (year && candidate.release_date && candidate.release_date.startsWith(String(year))) {
+          best = candidate;
+          break;
+        }
+      }
+
+      const matchData = {
+        tmdbId: best.id,
+        title: best.title,
+        originalTitle: best.original_title,
+        releaseDate: best.release_date,
+        releaseYear: best.release_date ? best.release_date.split('-')[0] : undefined,
+        posterPath: best.poster_path,
+        backdropPath: best.backdrop_path,
+        voteAverage: best.vote_average,
+        overview: best.overview,
+      };
+
+      tmdbServerCache.set(cacheKey, { data: matchData, timestamp: Date.now() });
+      res.json({ success: true, match: matchData });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || 'Internal error searching TMDB' });
+    }
+  });
+
+  // Search TMDB for TV Series
+  app.get('/api/tmdb/search/tv', async (req, res) => {
+    const { query, first_air_date_year } = req.query;
+    if (!query || typeof query !== 'string') return res.status(400).json({ error: 'Missing query' });
+
+    try {
+      const url = new URL(`${TMDB_BASE_URL}/search/tv`);
+      url.searchParams.append('query', query as string);
+      if (first_air_date_year) url.searchParams.append('first_air_date_year', first_air_date_year as string);
+      if (TMDB_API_KEY) url.searchParams.append('api_key', TMDB_API_KEY);
+
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (TMDB_READ_TOKEN) headers['Authorization'] = `Bearer ${TMDB_READ_TOKEN}`;
+
+      const response = await fetch(url.toString(), { headers });
+      const data = await response.json();
+      res.json({ success: true, match: data.results?.[0] ? { ...data.results[0], posterPath: data.results[0].poster_path, backdropPath: data.results[0].backdrop_path } : null });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Get TMDB TV Details
+  app.get('/api/tmdb/tv/:id', async (req, res) => {
     const { id } = req.params;
     try {
-      const response = await fetch(`https://mumowatch.ai.studio/movie/${id}`);
+      const url = new URL(`${TMDB_BASE_URL}/tv/${id}`);
+      if (TMDB_API_KEY) url.searchParams.append('api_key', TMDB_API_KEY);
+
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (TMDB_READ_TOKEN) headers['Authorization'] = `Bearer ${TMDB_READ_TOKEN}`;
+
+      const response = await fetch(url.toString(), { headers });
+      const data = await response.json();
+      res.json(data);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Get TMDB Movie Details by TMDB ID
+  app.get('/api/tmdb/movie/:id', async (req, res) => {
+    const { id } = req.params;
+    const cacheKey = `id_${id}`;
+
+    const cached = tmdbServerCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      return res.json(cached.data);
+    }
+
+    if (!TMDB_API_KEY && !TMDB_READ_TOKEN) {
+      return res.status(404).json({ error: 'TMDB credentials not configured' });
+    }
+
+    try {
+      const url = new URL(`${TMDB_BASE_URL}/movie/${id}`);
+      if (TMDB_API_KEY) url.searchParams.append('api_key', TMDB_API_KEY);
+
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (TMDB_READ_TOKEN) headers['Authorization'] = `Bearer ${TMDB_READ_TOKEN}`;
+
+      const response = await fetch(url.toString(), { headers });
+      if (!response.ok) {
+        return res.status(response.status).json({ error: 'TMDB movie details failed' });
+      }
+
+      const data = await response.json();
+      tmdbServerCache.set(cacheKey, { data, timestamp: Date.now() });
+      res.json(data);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // MOVIE SERVER API ROUTES (Source A)
+  // Authoritative endpoints for dashboard data, movies list, and stream URLs
+  // --------------------------------------------------------------------------
+
+  // Dashboard endpoint (supports both /dashboard and /api/dashboard)
+  const handleDashboard = async (req: express.Request, res: express.Response) => {
+    // Attempt live upstream movie server
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+      const upstream = await fetch(`${MOVIE_SERVER_URL}/dashboard`, {
+        signal: controller.signal,
+        headers: { Accept: 'application/json' },
+      });
+      clearTimeout(timeoutId);
+
+      if (upstream.ok) {
+        const data = await upstream.json();
+        if (data && (data.heroMovies || data.latestMovies)) {
+          return res.json(data);
+        }
+      }
+    } catch (e) {
+      // Upstream unavailable or rejected (fallback to authoritative server catalog)
+    }
+
+    res.json(serverCatalog);
+  };
+
+  app.get('/dashboard', handleDashboard);
+  app.get('/api/dashboard', handleDashboard);
+
+  // Search Movies catalog
+  app.get('/api/movies', (req, res) => {
+    const query = req.query.q as string;
+    let movies = getAllServerMovies();
+    if (query) {
+      const q = query.toLowerCase().trim();
+      const terms = q.split(' ');
+      movies = movies.filter(m => {
+        const searchableText = `${m.title} ${m.vj} ${m.genre} ${m.description || ''}`.toLowerCase();
+        return terms.every(term => searchableText.includes(term));
+      });
+    }
+    res.json(movies);
+  });
+
+  // Categories list
+  app.get('/api/categories', (req, res) => {
+    res.json(serverCatalog.categories);
+  });
+
+  // Movie Details endpoint
+  const handleMovieDetail = async (req: express.Request, res: express.Response) => {
+    const { id } = req.params;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+      const response = await fetch(`${MOVIE_SERVER_URL}/movie/${id}`, {
+        signal: controller.signal,
+        headers: { Accept: 'application/json' }
+      });
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const movie = await response.json();
         return res.json({ ...movie, isLocked: false });
       }
     } catch (e) {}
 
-    const allMovies = [...mockServerCatalog.heroMovies, ...mockServerCatalog.latestMovies];
+    const allMovies = getAllServerMovies();
     const movie = allMovies.find(m => m.id === id) || allMovies[0];
     res.json(movie);
-  });
+  };
 
-  app.get('/movie/:id/play', async (req, res) => {
+  app.get('/movie/:id', handleMovieDetail);
+  app.get('/api/movie/:id', handleMovieDetail);
+
+  // Movie Playback Stream URL
+  const handleMoviePlay = async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     try {
-      const response = await fetch(`https://mumowatch.ai.studio/movie/${id}/play`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+      const response = await fetch(`${MOVIE_SERVER_URL}/movie/${id}/play`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const data = await response.json();
         return res.json(data);
       }
     } catch (e) {}
 
+    const allMovies = getAllServerMovies();
+    const movie = allMovies.find(m => m.id === id);
+    const streamUrl = movie?.videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+
     res.json({
       success: true,
       movieId: id,
-      streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+      streamUrl,
     });
-  });
+  };
 
-  app.get('/series/:seriesCode/movie/play', async (req, res) => {
+  app.get('/movie/:id/play', handleMoviePlay);
+  app.get('/api/movie/:id/play', handleMoviePlay);
+
+  // Series Episode Playback Stream URL
+  const handleSeriesPlay = async (req: express.Request, res: express.Response) => {
     const { seriesCode } = req.params;
     try {
-      const response = await fetch(`https://mumowatch.ai.studio/series/${seriesCode}/movie/play`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+      const response = await fetch(`${MOVIE_SERVER_URL}/series/${seriesCode}/movie/play`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const data = await response.json();
         return res.json(data);
@@ -224,19 +382,34 @@ async function startServer() {
       seriesCode,
       streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
     });
-  });
+  };
 
-  // Vite middleware for frontend development
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: 'spa',
-  });
+  app.get('/series/:seriesCode/movie/play', handleSeriesPlay);
+  app.get('/api/series/:seriesCode/movie/play', handleSeriesPlay);
 
-  app.use(vite.middlewares);
+  // --------------------------------------------------------------------------
+  // SPA Serving & Vite Middleware
+  // --------------------------------------------------------------------------
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  if (!isProduction) {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+  } else {
+    app.use(express.static(path.join(__dirname, 'dist')));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, 'dist/index.html'));
+    });
+  }
 
   const PORT = 3000;
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`MunoWatch Server running on http://localhost:${PORT}`);
+    console.log(`[MunoWatch Full-Stack] Server running on http://0.0.0.0:${PORT}`);
+    console.log(`[Movie Server URL]: ${MOVIE_SERVER_URL}`);
+    console.log(`[TMDB Auth]: ${TMDB_READ_TOKEN ? 'Bearer Token' : TMDB_API_KEY ? 'API Key configured' : 'Not configured (using verified mapping)'}`);
   });
 }
 
