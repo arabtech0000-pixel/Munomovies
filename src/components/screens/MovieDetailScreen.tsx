@@ -27,94 +27,10 @@ interface MovieDetailScreenProps {
   onCastClick: () => void;
   onNotificationsClick: () => void;
   onShowToast?: (msg: string) => void;
+  relatedMovies?: Movie[];
 }
 
-export const YOU_MAY_ALSO_LIKE_LIST: Movie[] = [
-  {
-    id: 'like-poetic-justice',
-    title: 'Poetic Justice',
-    vj: 'Vj Junior',
-    genre: 'Drama',
-    duration: '01h 49m',
-    description: 'A young African-American poet navigates love, grief, and self-discovery on a road trip across California.',
-    posterUrl: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=600&q=80',
-    isLocked: true,
-  },
-  {
-    id: 'like-honor',
-    title: 'Honor (The Honor List)',
-    vj: 'Vj Emmy',
-    genre: 'Drama',
-    duration: '01h 43m',
-    description: 'Four former best friends reunite to complete a bucket list before graduation, discovering old bonds and hidden truths.',
-    posterUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=600&q=80',
-    isLocked: true,
-  },
-  {
-    id: 'like-kiss-of-death',
-    title: 'Kiss of Death',
-    vj: 'Vj Ice P',
-    genre: 'Thriller',
-    duration: '01h 38m',
-    description: 'A dangerous femme fatale pulls an undercover agent into an underworld conspiracy with deadly stakes.',
-    posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
-    isLocked: true,
-  },
-  {
-    id: 'like-step-up',
-    title: 'Step Up: Year of the Dance',
-    vj: 'Vj Junior',
-    genre: 'Dance / Musical',
-    duration: '01h 40m',
-    description: 'Underdog street dancers from different worlds unite to conquer the global underground dance battle arena.',
-    posterUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80',
-    isLocked: true,
-  },
-];
 
-export const ACTION_ROW_LIST: Movie[] = [
-  {
-    id: 'act-matchbox-2',
-    title: 'Matchbox: The Movie',
-    vj: 'Vj Junior',
-    genre: 'Action',
-    duration: '01h 55m',
-    description: 'High-octane desert convoy warfare with modified armored transports.',
-    posterUrl: 'https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?auto=format&fit=crop&w=600&q=80',
-    isLocked: true,
-  },
-  {
-    id: 'act-onslaught-2',
-    title: 'Onslaught',
-    vj: 'Vj Junior',
-    genre: 'Action',
-    duration: '01h 38m',
-    description: 'Relentless tactical siege tests human survival limits.',
-    posterUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80',
-    isLocked: true,
-  },
-  {
-    id: 'act-uprising-2',
-    title: 'The Uprising',
-    vj: 'Vj Ice P',
-    genre: 'Action',
-    duration: '02h 05m',
-    description: 'Rebel fighters take sword in hand against an oppressive dynasty.',
-    posterUrl: 'https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?auto=format&fit=crop&w=600&q=80',
-    isLocked: true,
-  },
-  {
-    id: 'act-sardar-2',
-    title: 'Sardar 4',
-    vj: 'Vj Ice P',
-    genre: 'Action',
-    duration: '01h 27m',
-    fileSize: '867 MB',
-    description: 'A classified intelligence agent meets his upright police officer son.',
-    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
-    isLocked: true,
-  },
-];
 
 export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
   movie,
@@ -128,6 +44,7 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
   onCastClick,
   onNotificationsClick,
   onShowToast,
+  relatedMovies,
 }) => {
   const [likes, setLikes] = useState(482);
   const [hasLiked, setHasLiked] = useState(false);
@@ -305,55 +222,32 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
         </div>
       </div>
 
-      {/* "You may also like" Section (Screenshots 11 & 13) */}
-      <div className="mt-6">
-        <div className="px-5 flex items-center justify-between">
-          <h3 className="text-white text-[16px] font-bold">You may also like</h3>
-          <ArrowRight className="w-4 h-4 text-white" />
+      {/* "You may also like" Section */}
+      {relatedMovies && relatedMovies.length > 0 && (
+        <div className="mt-6">
+          <div className="px-5 flex items-center justify-between">
+            <h3 className="text-white text-[16px] font-bold">You may also like</h3>
+            <ArrowRight className="w-4 h-4 text-white" />
+          </div>
+          <div className="mt-2.5 flex overflow-x-auto scrollbar-none px-5 space-x-2.5 pb-2 touch-pan-x">
+            {relatedMovies.map((m) => (
+              <div
+                key={m.id}
+                onClick={() => onMovieClick(m)}
+                className="flex-shrink-0 w-[110px] cursor-pointer"
+              >
+                <MoviePoster
+                  src={m.posterUrl}
+                  alt={m.title}
+                  title={m.title}
+                  vj={m.vj}
+                  isLocked={m.isLocked}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="mt-2.5 flex overflow-x-auto scrollbar-none px-5 space-x-2.5 pb-2 touch-pan-x">
-          {YOU_MAY_ALSO_LIKE_LIST.map((m) => (
-            <div
-              key={m.id}
-              onClick={() => onMovieClick(m)}
-              className="flex-shrink-0 w-[110px] cursor-pointer"
-            >
-              <MoviePoster
-                src={m.posterUrl}
-                alt={m.title}
-                title={m.title}
-                vj={m.vj}
-                isLocked={m.isLocked}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* "Action" Section (Screenshots 11 & 13) */}
-      <div className="mt-4">
-        <div className="px-5 flex items-center justify-between">
-          <h3 className="text-white text-[16px] font-bold">Action</h3>
-          <ArrowRight className="w-4 h-4 text-white" />
-        </div>
-        <div className="mt-2.5 flex overflow-x-auto scrollbar-none px-5 space-x-2.5 pb-2 touch-pan-x">
-          {ACTION_ROW_LIST.map((m) => (
-            <div
-              key={m.id}
-              onClick={() => onMovieClick(m)}
-              className="flex-shrink-0 w-[110px] cursor-pointer"
-            >
-              <MoviePoster
-                src={m.posterUrl}
-                alt={m.title}
-                title={m.title}
-                vj={m.vj}
-                isLocked={m.isLocked}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

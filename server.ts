@@ -247,16 +247,20 @@ async function startServer() {
   });
 
   // --------------------------------------------------------------------------
-  // MOVIE SERVER API ROUTES (Source A)
-  // Authoritative endpoints for dashboard data, movies list, and stream URLs
+  // MOVIE SERVER API ROUTES (Source A: Primary Authoritative Source)
+  // Approved Endpoints:
+  // - Dashboard: https://mumowatch.ai.studio/dashboard
+  // - Movie Details: https://mumowatch.ai.studio/movie/:id
+  // - Stream Streamer (GET Play): https://mumowatch.ai.studio/movie/:id/play
+  // - Search Engine: https://mumowatch.ai.studio/search?q=:q
+  // - Series Container: https://mumowatch.ai.studio/series/:code
   // --------------------------------------------------------------------------
 
   // Dashboard endpoint (supports both /dashboard and /api/dashboard)
   const handleDashboard = async (req: express.Request, res: express.Response) => {
-    // Attempt live upstream movie server
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
       const upstream = await fetch(`${MOVIE_SERVER_URL}/dashboard`, {
         signal: controller.signal,
@@ -266,13 +270,47 @@ async function startServer() {
 
       if (upstream.ok) {
         const data = await upstream.json();
-        if (data && (data.heroMovies || data.latestMovies)) {
-          return res.json(data);
+        if (data && Array.isArray(data.movies) && data.movies.length > 0) {
+          
+          const catMap: Record<number, string> = {
+            1: 'Action', 2: 'Horror', 5: 'Series', 6: 'Kung Fu', 9: 'Comedy', 14: 'Animation', 25: 'Drama', 12: 'Crime', 26: 'Sport'
+          };
+
+          const movies = data.movies.map((m: any) => {
+            const catId = parseInt(m.category_id);
+            const genre = catMap[catId] || 'Action';
+            
+            return {
+              id: String(m.id),
+              title: m.title && m.title.trim() ? m.title.trim() : `Movie ${m.id}`,
+              vj: (m.vj && m.vj.trim()) ? m.vj.trim() : 'Vj Junior',
+              genre: genre,
+              category_id: String(catId),
+              duration: m.duration || '01h 30m',
+              fileSize: m.size || '1.0 GB',
+              rating: m.rating || '16+',
+              description: m.description || `Exclusive Luganda release.`,
+              posterUrl: (m.image && !m.image.includes('unsplash.com')) ? m.image.replace(/^http:\/\//i, 'https://') : undefined,
+              videoUrl: m.playingurl ? m.playingurl.replace(/^http:\/\//i, 'https://') : undefined,
+              isLocked: false,
+            };
+          });
+
+          const categorized = {
+            heroMovies: movies.slice(0, 5),
+            latestMovies: movies,
+            actionMovies: movies.filter((m: any) => m.genre === 'Action'),
+            horrorMovies: movies.filter((m: any) => m.genre === 'Horror'),
+            seriesMovies: movies.filter((m: any) => m.genre === 'Series'),
+            kungfuMovies: movies.filter((m: any) => m.genre === 'Kung Fu'),
+            animationMovies: movies.filter((m: any) => m.genre === 'Animation'),
+            vjJuniorMovies: movies.filter((m: any) => m.vj?.toLowerCase().includes('junior')),
+            categories: serverCatalog.categories
+          };
+          return res.json(categorized);
         }
       }
-    } catch (e) {
-      // Upstream unavailable or rejected (fallback to authoritative server catalog)
-    }
+    } catch (e) {}
 
     res.json(serverCatalog);
   };
@@ -280,74 +318,220 @@ async function startServer() {
   app.get('/dashboard', handleDashboard);
   app.get('/api/dashboard', handleDashboard);
 
-  // Search Movies catalog
-  app.get('/api/movies', (req, res) => {
-    const query = req.query.q as string;
-    let movies = getAllServerMovies();
-    if (query) {
-      const q = query.toLowerCase().trim();
-      const terms = q.split(' ');
-      movies = movies.filter(m => {
-        const searchableText = `${m.title} ${m.vj} ${m.genre} ${m.description || ''}`.toLowerCase();
-        return terms.every(term => searchableText.includes(term));
-      });
+  // Search Engine endpoint (approved: https://mumowatch.ai.studio/search?q=:q)
+  const handleSearch = async (req: express.Request, res: express.Response) => {
+    const query = (req.query.q as string) || '';
+    if (!query.trim()) {
+      return res.json([]);
     }
-    res.json(movies);
-  });
+
+    // 1. Query upstream live search
+    let upstreamResults: any[] = [];
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+      const response = await fetch(`${MOVIE_SERVER_URL}/search?q=${encodeURIComponent(query.trim())}`, {
+        signal: controller.signal,
+        headers: { Accept: 'application/json' },
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const searchData = await response.json();
+        if (searchData) {
+          if (Array.isArray(searchData)) {
+            upstreamResults = searchData;
+          } else {
+            if (Array.isArray(searchData.movies)) {
+              upstreamResults.push(...searchData.movies);
+            }
+            if (Array.isArray(searchData.series)) {
+              for (const s of searchData.series) {
+                if (s.episodes && Array.isArray(s.episodes)) {
+                  for (const ep of s.episodes) {
+                    upstreamResults.push({
+                      id: String(ep.id || s.series_code),
+                      title: ep.title || s.title,
+                      vj: 'Vj Junior',
+                      genre: 'TV Series',
+                      posterUrl: ep.image || s.image,
+                      videoUrl: ep.playingurl,
+                      isSeries: true,
+                    });
+                  }
+                } else {
+                  upstreamResults.push({
+                    id: String(s.series_code),
+                    title: s.title,
+                    vj: 'Vj Junior',
+                    genre: 'TV Series',
+                    posterUrl: s.image,
+                    isSeries: true,
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {}
+
+    // 2. Query local server catalog
+    const allMovies = getAllServerMovies();
+    const qLower = query.toLowerCase().trim();
+    const terms = qLower.split(' ');
+    const localMatches = allMovies.filter((m) => {
+      const text = `${m.title} ${m.vj} ${m.genre} ${m.description || ''}`.toLowerCase();
+      return terms.every((term) => text.includes(term));
+    });
+
+    // Merge unique results prioritizing full local records
+    const map = new Map<string, any>();
+    for (const m of localMatches) {
+      map.set(String(m.id), m);
+    }
+    for (const m of upstreamResults) {
+      const key = String(m.id || m.series_code || m.title);
+      if (!map.has(key)) {
+        map.set(key, {
+          id: String(m.id || m.series_code),
+          title: m.title,
+          vj: m.vj || 'Vj Junior',
+          genre: m.category_name || m.genre || 'Action',
+          posterUrl: (m.image && !m.image.includes('unsplash.com')) ? m.image.replace(/^http:\/\//i, 'https://') : undefined,
+          videoUrl: m.playingurl ? m.playingurl.replace(/^http:\/\//i, 'https://') : undefined,
+          isLocked: false,
+        });
+      }
+    }
+
+    res.json(Array.from(map.values()));
+  };
+
+  app.get('/search', handleSearch);
+  app.get('/api/search', handleSearch);
+  app.get('/api/movies', handleSearch);
 
   // Categories list
   app.get('/api/categories', (req, res) => {
     res.json(serverCatalog.categories);
   });
 
-  // Movie Details endpoint
+  // Movie Details endpoint (approved: https://mumowatch.ai.studio/movie/:id)
   const handleMovieDetail = async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
 
       const response = await fetch(`${MOVIE_SERVER_URL}/movie/${id}`, {
         signal: controller.signal,
-        headers: { Accept: 'application/json' }
+        headers: { Accept: 'application/json' },
       });
       clearTimeout(timeoutId);
 
       if (response.ok) {
-        const movie = await response.json();
-        return res.json({ ...movie, isLocked: false });
+        const rawMovie = await response.json();
+        if (rawMovie && rawMovie.title) {
+          const secureStream = rawMovie.playingurl ? rawMovie.playingurl.replace(/^http:\/\//i, 'https://') : undefined;
+          const securePoster = rawMovie.image ? rawMovie.image.replace(/^http:\/\//i, 'https://') : undefined;
+          return res.json({
+            id: String(rawMovie.id),
+            title: rawMovie.title,
+            vj: (rawMovie.vj && rawMovie.vj.trim()) ? rawMovie.vj.trim() : 'Vj Junior',
+            genre: rawMovie.genre || 'Action',
+            duration: rawMovie.duration || '01h 45m',
+            fileSize: rawMovie.size || '1.45 GB',
+            rating: rawMovie.rating || '16+',
+            narration: 'English to Luganda',
+            description: rawMovie.description || `Exclusive Luganda translated release with ${rawMovie.vj || 'Vj Junior'}.`,
+            posterUrl: securePoster,
+            heroBannerUrl: securePoster,
+            videoUrl: secureStream,
+            isLocked: false,
+          });
+        }
       }
     } catch (e) {}
 
     const allMovies = getAllServerMovies();
-    const movie = allMovies.find(m => m.id === id) || allMovies[0];
+    const movie = allMovies.find((m) => String(m.id) === String(id) || m.id === id) || allMovies[0];
     res.json(movie);
   };
 
   app.get('/movie/:id', handleMovieDetail);
   app.get('/api/movie/:id', handleMovieDetail);
 
-  // Movie Playback Stream URL
+  // Movie Playback Stream URL (approved: https://mumowatch.ai.studio/movie/:id/play)
+  // Handles HTTP 302 redirect directly to BunnyCDN .mp4 stream and ensures HTTPS
   const handleMoviePlay = async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+
+    // 1. Attempt live upstream redirect resolution
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+      const response = await fetch(`${MOVIE_SERVER_URL}/movie/${id}/play`, {
+        signal: controller.signal,
+        redirect: 'manual', // intercept 302 redirect
+      });
+      clearTimeout(timeoutId);
+
+      // Check 302 redirect Location header
+      const location = response.headers.get('location');
+      if (location) {
+        const secureUrl = location.replace(/^http:\/\//i, 'https://');
+        return res.json({
+          success: true,
+          movieId: id,
+          streamUrl: secureUrl,
+        });
+      }
+
+      if (response.ok) {
+        const text = await response.text();
+        try {
+          const json = JSON.parse(text);
+          if (json.streamUrl || json.playingurl) {
+            const url = (json.streamUrl || json.playingurl).replace(/^http:\/\//i, 'https://');
+            return res.json({ success: true, movieId: id, streamUrl: url });
+          }
+        } catch (_) {}
+      }
+    } catch (e) {}
+
+    // 2. Fallback: check details endpoint /movie/:id which contains playingurl
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
 
-      const response = await fetch(`${MOVIE_SERVER_URL}/movie/${id}/play`, {
+      const detailRes = await fetch(`${MOVIE_SERVER_URL}/movie/${id}`, {
         signal: controller.signal,
+        headers: { Accept: 'application/json' },
       });
       clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const data = await response.json();
-        return res.json(data);
+      if (detailRes.ok) {
+        const detail = await detailRes.json();
+        if (detail && detail.playingurl) {
+          const secureUrl = detail.playingurl.replace(/^http:\/\//i, 'https://');
+          return res.json({
+            success: true,
+            movieId: id,
+            streamUrl: secureUrl,
+          });
+        }
       }
     } catch (e) {}
 
+    // 3. Fallback to authoritative server catalog record
     const allMovies = getAllServerMovies();
-    const movie = allMovies.find(m => m.id === id);
-    const streamUrl = movie?.videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    const movie = allMovies.find((m) => String(m.id) === String(id) || m.id === id);
+    const streamUrl =
+      movie?.videoUrl?.replace(/^http:\/\//i, 'https://') ||
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
 
     res.json({
       success: true,
@@ -359,33 +543,45 @@ async function startServer() {
   app.get('/movie/:id/play', handleMoviePlay);
   app.get('/api/movie/:id/play', handleMoviePlay);
 
-  // Series Episode Playback Stream URL
-  const handleSeriesPlay = async (req: express.Request, res: express.Response) => {
-    const { seriesCode } = req.params;
+  // Series Container endpoint (approved: https://mumowatch.ai.studio/series/:code)
+  const handleSeriesDetails = async (req: express.Request, res: express.Response) => {
+    const { code } = req.params;
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-      const response = await fetch(`${MOVIE_SERVER_URL}/series/${seriesCode}/movie/play`, {
+      const response = await fetch(`${MOVIE_SERVER_URL}/series/${code}`, {
         signal: controller.signal,
+        headers: { Accept: 'application/json' },
       });
       clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
-        return res.json(data);
+        if (data && data.episodes) {
+          // Ensure all episode stream URLs use HTTPS
+          const secureEpisodes = data.episodes.map((ep: any) => ({
+            ...ep,
+            playingurl: ep.playingurl ? ep.playingurl.replace(/^http:\/\//i, 'https://') : ep.playingurl,
+            image: ep.image ? ep.image.replace(/^http:\/\//i, 'https://') : ep.image,
+          }));
+          return res.json({
+            ...data,
+            episodes: secureEpisodes,
+          });
+        }
       }
     } catch (e) {}
 
     res.json({
-      success: true,
-      seriesCode,
-      streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+      series_code: code,
+      count: 0,
+      episodes: [],
     });
   };
 
-  app.get('/series/:seriesCode/movie/play', handleSeriesPlay);
-  app.get('/api/series/:seriesCode/movie/play', handleSeriesPlay);
+  app.get('/series/:code', handleSeriesDetails);
+  app.get('/api/series/:code', handleSeriesDetails);
 
   // --------------------------------------------------------------------------
   // SPA Serving & Vite Middleware

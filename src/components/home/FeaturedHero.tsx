@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Cast, Bell, Search, Play } from 'lucide-react';
 import { Movie } from '../../types';
 
+import munnoLogo from '../../assets/munno_movies_logo.png';
+
 interface FeaturedHeroProps {
   movies: Movie[];
+  onHomeClick?: () => void;
   onSearchClick: () => void;
   onCastClick: () => void;
   onNotificationsClick: () => void;
@@ -13,6 +16,7 @@ interface FeaturedHeroProps {
 
 export const FeaturedHero: React.FC<FeaturedHeroProps> = ({
   movies,
+  onHomeClick,
   onSearchClick,
   onCastClick,
   onNotificationsClick,
@@ -60,46 +64,25 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({
           <div className="absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-[#05051F] via-[#05051F]/80 to-transparent pointer-events-none z-10" />
         </div>
 
-        {/* Top Header Bar - Exact stylized 3D icon on the homepage hero section */}
+        {/* Top Header Bar - Uploaded MM icon used as Home button */}
         <div className="relative z-20 h-16 px-4 pt-3 flex items-center justify-between">
-          <div className="flex items-center cursor-pointer select-none">
-            <svg
-              className="h-8 w-auto"
-              viewBox="0 0 110 38"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient id="heroWhiteMetallic" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FFFFFF" />
-                  <stop offset="60%" stopColor="#E2E8F0" />
-                  <stop offset="100%" stopColor="#94A3B8" />
-                </linearGradient>
-                <linearGradient id="heroGreenVivid" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#00FF2A" />
-                  <stop offset="50%" stopColor="#00D522" />
-                  <stop offset="100%" stopColor="#009915" />
-                </linearGradient>
-                <filter id="heroShadow3d" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="1" dy="2" stdDeviation="1.5" floodColor="#000000" floodOpacity="0.8" />
-                </filter>
-              </defs>
-
-              {/* Left leg of M */}
-              <path
-                d="M6 34V4h8l9 17 9-17h8v30h-7V16l-8 15h-4l-8-15v18H6z"
-                fill="url(#heroWhiteMetallic)"
-                filter="url(#heroShadow3d)"
-              />
-
-              {/* Connected Green N with 3D angle */}
-              <path
-                d="M36 34V4h7l14 20V4h7v30h-7L43 14v20h-7z"
-                fill="url(#heroGreenVivid)"
-                filter="url(#heroShadow3d)"
-              />
-            </svg>
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onHomeClick) {
+                onHomeClick();
+              }
+            }}
+            className="flex items-center cursor-pointer select-none focus:outline-none group/icon active:scale-95 transition-transform"
+            aria-label="Home"
+            title="Munno Movies - Home"
+          >
+            <img
+              src={munnoLogo}
+              alt="Munno Movies"
+              className="h-10 w-10 sm:h-11 sm:w-11 object-cover rounded-xl opacity-80 hover:opacity-100 transition-opacity duration-200"
+            />
+          </button>
 
           {/* Right Action Icons: Cast, Bell, Search */}
           <div className="flex items-center space-x-4" onClick={(e) => e.stopPropagation()}>
@@ -131,7 +114,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({
         <div className="relative z-20 px-4 pb-6 pt-10 mt-auto flex flex-col justify-end">
           {/* Movie Title and VJ tag */}
           <h2 className="text-2xl sm:text-3xl font-black text-white drop-shadow-lg tracking-tight flex items-baseline flex-wrap gap-2">
-            <span>{currentMovie.title}</span>
+            <span>{currentMovie.title || `Movie ${currentMovie.id}`}</span>
             <span className="text-[#00D522] text-sm sm:text-base font-bold">
               : {currentMovie.vj || 'Vj Emmy'}
             </span>

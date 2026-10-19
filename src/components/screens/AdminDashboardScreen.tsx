@@ -74,13 +74,13 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
             // If empty in Firebase, initialize with current admin account
             const defaultAdmin: UserRecord = {
               uid: 'admin_root',
-              displayName: 'Admin Manager',
-              email: 'admin@munomovies.com',
+              displayName: 'Ashiraf Ashes',
+              email: 'ashirafashes04@gmail.com',
               role: 'admin',
               status: 'active',
               createdAt: '2026-10-19',
               lastLogin: Date.now(),
-              plan: 'Admin Pass',
+              plan: 'Super Admin Pass',
               amountPaid: 15500,
             };
             setUsers([defaultAdmin]);
@@ -93,13 +93,13 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
           setUsers([
             {
               uid: 'admin_local',
-              displayName: 'Admin Manager',
-              email: 'admin@munomovies.com',
+              displayName: 'Ashiraf Ashes',
+              email: 'ashirafashes04@gmail.com',
               role: 'admin',
               status: 'active',
               createdAt: '2026-10-19',
               lastLogin: Date.now(),
-              plan: 'Monthly VIP',
+              plan: 'Super Admin Pass',
               amountPaid: 15500,
             },
           ]);

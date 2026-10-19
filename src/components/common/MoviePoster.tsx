@@ -50,10 +50,8 @@ export const MoviePoster: React.FC<MoviePosterProps> = ({
         : progressPercent * 100
       : null;
 
-  // Enforce zero mock Unsplash pictures: only valid TMDB or custom real image URLs
   const isValidImage = Boolean(
     src &&
-    !src.includes('unsplash.com') &&
     src !== 'placeholder' &&
     !hasError
   );
@@ -78,16 +76,16 @@ export const MoviePoster: React.FC<MoviePosterProps> = ({
           }`}
         />
       ) : (
-        /* Neutral application-designed placeholder matching the reference screenshots */
-        <div className="w-full h-full bg-gradient-to-b from-[#0B0B2A] to-[#040416] flex flex-col items-center justify-center p-2 relative">
-          <MountainPlaceholder className="w-12 h-12 opacity-85 mb-1" />
+        /* Enhanced application-designed placeholder */
+        <div className="w-full h-full bg-[#1A1A3D] flex flex-col items-center justify-center p-3 relative border border-white/5">
+          <MountainPlaceholder className="w-16 h-16 opacity-40 mb-2" />
           {title && (
-            <p className="text-white/80 text-[10px] font-semibold text-center line-clamp-2 px-1 uppercase tracking-tight">
+            <p className="text-white/90 text-[11px] font-bold text-center line-clamp-2 px-2 uppercase tracking-wide">
               {title}
             </p>
           )}
           {vj && (
-            <p className="text-[#00D522] text-[9px] font-medium text-center truncate">
+            <p className="text-[#00D522] text-[10px] font-semibold text-center mt-1 truncate px-2">
               {vj}
             </p>
           )}

@@ -5,25 +5,12 @@
 
 import React, { useState, useRef } from 'react';
 import { Movie, ActiveTab, ViewScreen } from './types';
-import {
-  FEATURED_HERO_MOVIES,
-  LATEST_ON_MUNOWATCH,
-  CONTINUE_WATCHING_LIST,
-  ACTION_MOVIES,
-  HORROR_MOVIES,
-  TV_SERIES_MOVIES,
-  KUNGFU_MOVIES,
-  ANIMES_MOVIES,
-  VJ_JUNIOR_EXCLUSIVES,
-  DOWNLOADED_MOVIES,
-  ALL_MOVIES_FOR_SEARCH,
-} from './data/mockData';
 import { getCategoryGridMovies } from './data/categoryMoviesData';
 import { BottomNav } from './components/common/BottomNav';
 import { FeaturedHero } from './components/home/FeaturedHero';
 import { PosterRow } from './components/home/PosterRow';
 import { ContinueWatchingRow } from './components/home/ContinueWatchingRow';
-import { MovieDetailScreen, YOU_MAY_ALSO_LIKE_LIST } from './components/screens/MovieDetailScreen';
+import { MovieDetailScreen } from './components/screens/MovieDetailScreen';
 import { CategoriesScreen } from './components/screens/CategoriesScreen';
 import { CategoryDetailScreen } from './components/screens/CategoryDetailScreen';
 import { SavedScreen } from './components/screens/SavedScreen';
@@ -52,10 +39,10 @@ export default function App() {
     return localStorage.getItem('munowatch_is_admin') === 'true';
   });
   const [userName, setUserName] = useState<string>(() => {
-    return localStorage.getItem('munowatch_user_name') || 'Ashiraf Mutagwanya';
+    return localStorage.getItem('munowatch_user_name') || 'Ashiraf Ashes';
   });
   const [userEmail, setUserEmail] = useState<string>(() => {
-    return localStorage.getItem('munowatch_user_email') || 'mutagwanyaashiraf@gmail.com';
+    return localStorage.getItem('munowatch_user_email') || 'ashirafashes04@gmail.com';
   });
   const [userAvatar, setUserAvatar] = useState<string>(() => {
     return localStorage.getItem('munomovies_avatar') || '';
@@ -66,18 +53,18 @@ export default function App() {
     return localStorage.getItem('munowatch_auth') === 'true' ? 'home' : 'login';
   });
   const [currentTab, setCurrentTab] = useState<ActiveTab>('home');
-  const [heroMovies, setHeroMovies] = useState<Movie[]>(FEATURED_HERO_MOVIES);
-  const [latestMovies, setLatestMovies] = useState<Movie[]>(LATEST_ON_MUNOWATCH);
-  const [continueWatchingMovies, setContinueWatchingMovies] = useState<Movie[]>(CONTINUE_WATCHING_LIST);
-  const [actionMovies, setActionMovies] = useState<Movie[]>(ACTION_MOVIES);
-  const [horrorMovies, setHorrorMovies] = useState<Movie[]>(HORROR_MOVIES);
-  const [seriesMovies, setSeriesMovies] = useState<Movie[]>(TV_SERIES_MOVIES);
-  const [kungfuMovies, setKungfuMovies] = useState<Movie[]>(KUNGFU_MOVIES);
-  const [animationMovies, setAnimationMovies] = useState<Movie[]>(ANIMES_MOVIES);
-  const [vjJuniorMovies, setVjJuniorMovies] = useState<Movie[]>(VJ_JUNIOR_EXCLUSIVES);
-  const [selectedMovie, setSelectedMovie] = useState<Movie>(LATEST_ON_MUNOWATCH[2] || FEATURED_HERO_MOVIES[0]);
+  const [heroMovies, setHeroMovies] = useState<Movie[]>([]);
+  const [latestMovies, setLatestMovies] = useState<Movie[]>([]);
+  const [continueWatchingMovies, setContinueWatchingMovies] = useState<Movie[]>([]);
+  const [actionMovies, setActionMovies] = useState<Movie[]>([]);
+  const [horrorMovies, setHorrorMovies] = useState<Movie[]>([]);
+  const [seriesMovies, setSeriesMovies] = useState<Movie[]>([]);
+  const [kungfuMovies, setKungfuMovies] = useState<Movie[]>([]);
+  const [animationMovies, setAnimationMovies] = useState<Movie[]>([]);
+  const [vjJuniorMovies, setVjJuniorMovies] = useState<Movie[]>([]);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [savedMovies, setSavedMovies] = useState<Movie[]>([]);
-  const [downloadedMovies, setDownloadedMovies] = useState<Movie[]>(DOWNLOADED_MOVIES);
+  const [downloadedMovies, setDownloadedMovies] = useState<Movie[]>([]);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [playingMovie, setPlayingMovie] = useState<Movie | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -94,7 +81,7 @@ export default function App() {
   // Selected Category & Movies for CategoryDetailScreen
   const [selectedCategoryName, setSelectedCategoryName] = useState<string>('Action');
   const [selectedCategoryType, setSelectedCategoryType] = useState<'genre' | 'veejay'>('genre');
-  const [selectedCategoryMovies, setSelectedCategoryMovies] = useState<Movie[]>(ACTION_MOVIES);
+  const [selectedCategoryMovies, setSelectedCategoryMovies] = useState<Movie[]>([]);
   const [categoryReturnScreen, setCategoryReturnScreen] = useState<ViewScreen>('categories');
 
   const showToast = (msg: string) => {
@@ -226,17 +213,9 @@ export default function App() {
 
   const handleProgressUpdate = (movieId: string, progressPercent: number) => {
     setContinueWatchingMovies((prev) => {
-      const existing = prev.find((m) => m.id === movieId);
-      if (existing) {
-        return prev.map((m) =>
-          m.id === movieId ? { ...m, progressPercent } : m
-        );
-      }
-      const full = ALL_MOVIES_FOR_SEARCH.find((m) => m.id === movieId);
-      if (full) {
-        return [{ ...full, progressPercent }, ...prev];
-      }
-      return prev;
+      return prev.map((m) =>
+        m.id === movieId ? { ...m, progressPercent } : m
+      );
     });
   };
 
@@ -256,6 +235,13 @@ export default function App() {
           <div className="flex flex-col pb-24">
             <FeaturedHero
               movies={heroMovies}
+              onHomeClick={() => {
+                if (scrollContainerRef.current) {
+                  scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                setCurrentTab('home');
+                setActiveScreen('home');
+              }}
               onSearchClick={() => {
                 setSearchQuery('');
                 setActiveScreen('search');
@@ -281,7 +267,7 @@ export default function App() {
 
             <PosterRow
               title="You may also like"
-              movies={YOU_MAY_ALSO_LIKE_LIST}
+              movies={[]}
               onArrowClick={() => handleSelectCategory('You May Also Like', 'genre', 'home')}
               onMovieClick={handleMovieClick}
             />
@@ -344,6 +330,7 @@ export default function App() {
             onCastClick={() => showToast('Cast device connected')}
             onNotificationsClick={() => setActiveScreen('new_uploads')}
             onShowToast={showToast}
+            relatedMovies={latestMovies}
           />
         )}
 
@@ -535,7 +522,7 @@ export default function App() {
           <LoginScreen
             onBack={isAuthenticated ? () => setActiveScreen('home') : undefined}
             isFirstLaunch={!isAuthenticated}
-            onLoginSuccess={(adminFlag = false, name = 'Ashiraf Mutagwanya', email = 'mutagwanyaashiraf@gmail.com') => {
+            onLoginSuccess={(adminFlag = false, name = 'Ashiraf Ashes', email = 'ashirafashes04@gmail.com') => {
               setIsAuthenticated(true);
               setIsAdmin(adminFlag);
               setUserName(name);

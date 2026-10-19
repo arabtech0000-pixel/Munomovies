@@ -665,14 +665,14 @@ export async function resolveMovieMetadata(serverMovie: Movie): Promise<Movie> {
     return applyMatchToServerMovie(serverMovie, match);
   }
 
-  // ... (rest of function)
+  // Server is the primary source; TMDB provides missing backdrop/overview
   const cleanPoster = (serverMovie.posterUrl && !serverMovie.posterUrl.includes('unsplash.com'))
     ? serverMovie.posterUrl
     : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80';
 
   const cleanBanner = (serverMovie.heroBannerUrl && !serverMovie.heroBannerUrl.includes('unsplash.com'))
     ? serverMovie.heroBannerUrl
-    : 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80';
+    : cleanPoster;
 
   return {
     ...serverMovie,
@@ -697,29 +697,37 @@ export async function enrichMovieList(movies: Movie[]): Promise<Movie[]> {
 }
 
 /**
- * Helper to safely merge TMDB match into server movie record without touching playback URLs
+ * Helper to safely merge TMDB match into server movie record without overriding server data.
+ * TMDB is used solely to fill in missing information not provided by the server.
  */
 function applyMatchToServerMovie(serverMovie: Movie, match: TmdbMatch): Movie {
+  // Prefer server's authentic poster from BunnyCDN; fill in missing backdrop with TMDB
+  const hasValidServerPoster = Boolean(serverMovie.posterUrl && !serverMovie.posterUrl.includes('unsplash.com'));
+  const posterUrl = hasValidServerPoster ? serverMovie.posterUrl : (match.posterUrl || serverMovie.posterUrl);
+  const heroBannerUrl = match.backdropUrl || serverMovie.heroBannerUrl || posterUrl || undefined;
+
   return {
     ...serverMovie,
-    tmdbId: match.tmdbId,
-    originalTitle: match.originalTitle,
-    posterUrl: match.posterUrl || (serverMovie.posterUrl?.includes('unsplash') ? null : serverMovie.posterUrl),
-    heroBannerUrl: match.backdropUrl || serverMovie.heroBannerUrl,
-    description: match.overview || serverMovie.description,
-    year: match.releaseYear || serverMovie.year,
-    rating: match.voteAverage ? `${match.voteAverage.toFixed(1)}/10` : serverMovie.rating,
-    genresList: match.genres,
-    runtimeMinutes: match.runtimeMinutes,
-    metadataResolved: true,
-    // Preserve authoritative server fields
+    // Authoritative server data
     id: serverMovie.id,
-    videoUrl: serverMovie.videoUrl,
-    endpoint: serverMovie.endpoint,
+    title: serverMovie.title,
     vj: serverMovie.vj,
+    posterUrl: posterUrl || undefined,
+    heroBannerUrl: heroBannerUrl || undefined,
+    videoUrl: serverMovie.videoUrl ? serverMovie.videoUrl.replace(/^http:\/\//i, 'https://') : serverMovie.videoUrl,
     fileSize: serverMovie.fileSize,
     duration: serverMovie.duration,
     narration: serverMovie.narration,
     isLocked: serverMovie.isLocked,
+    endpoint: serverMovie.endpoint,
+    // Fill in missing information from TMDB
+    tmdbId: match.tmdbId,
+    originalTitle: serverMovie.originalTitle || match.originalTitle || undefined,
+    description: (serverMovie.description && serverMovie.description.length > 20) ? serverMovie.description : (match.overview || serverMovie.description),
+    year: serverMovie.year || match.releaseYear || undefined,
+    rating: serverMovie.rating || (match.voteAverage ? `${match.voteAverage.toFixed(1)}/10` : '16+'),
+    genresList: match.genres || undefined,
+    runtimeMinutes: match.runtimeMinutes || undefined,
+    metadataResolved: true,
   };
 }

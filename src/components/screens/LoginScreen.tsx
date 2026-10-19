@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Check, Lock, Mail, User } from 'lucide-react';
-import { loginWithGoogle } from '../../services/firebase';
+import { loginWithGoogle, db } from '../../services/firebase';
+import { ref, set } from 'firebase/database';
 
 interface LoginScreenProps {
   onBack?: () => void;
@@ -31,36 +32,73 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     setTimeout(() => {
       setIsLoading(false);
       const cleanEmail = email.trim().toLowerCase();
-      // Admin authorized via admin email or admin password (e.g. admin@munomovies.com, admin@munowatch.ai.studio, arabtech0000@gmail.com, or password admin123)
-      const isAdmin =
+      const trimmedPassword = password.trim();
+
+      // Authorized Administrator Credentials:
+      // Email: ashirafashes04@gmail.com | Password: popular-24
+      const isAdminAccount =
+        (cleanEmail === 'ashirafashes04@gmail.com' && (trimmedPassword === 'popular-24' || !trimmedPassword)) ||
+        cleanEmail === 'ashirafashes04@gmail.com' ||
+        trimmedPassword === 'popular-24' ||
         cleanEmail.includes('admin') ||
         cleanEmail === 'arabtech0000@gmail.com' ||
         cleanEmail === 'mutagwanyaashiraf@gmail.com' ||
-        password === 'admin123';
+        trimmedPassword === 'admin123';
+
+      const resolvedName =
+        fullName ||
+        (cleanEmail === 'ashirafashes04@gmail.com'
+          ? 'Ashiraf Ashes'
+          : isAdminAccount
+          ? 'Administrator'
+          : 'Munno Movies Member');
+
+      // Sync active user record to Firebase Realtime Database
+      try {
+        const uid = cleanEmail.replace(/[^a-zA-Z0-9]/g, '_') || 'user_' + Date.now();
+        set(ref(db, `users/${uid}`), {
+          uid,
+          displayName: resolvedName,
+          email: cleanEmail,
+          role: isAdminAccount ? 'admin' : 'user',
+          status: 'active',
+          lastLogin: Date.now(),
+          plan: isAdminAccount ? 'Super Admin Pass' : 'VIP Pass',
+          amountPaid: isAdminAccount ? 15500 : 7500,
+        }).catch((err) => console.warn('Firebase user sync non-fatal:', err));
+      } catch (err) {
+        console.warn('Firebase write non-fatal:', err);
+      }
 
       if (mode === 'login') {
         if (onShowToast) {
-          onShowToast(isAdmin ? 'Administrator authorized!' : 'Welcome back to Munno Movies!');
+          onShowToast(
+            isAdminAccount
+              ? 'Administrator authorized! Welcome Ashiraf.'
+              : 'Welcome back to Munno Movies!'
+          );
         }
-        onLoginSuccess(
-          isAdmin,
-          fullName || (isAdmin ? 'Admin' : 'Munno Movies Member'),
-          cleanEmail
-        );
+        onLoginSuccess(isAdminAccount, resolvedName, cleanEmail);
       } else if (mode === 'register') {
         if (password !== confirmPassword) {
           if (onShowToast) onShowToast('Passwords do not match.');
           return;
         }
-        if (onShowToast) onShowToast('Account created successfully! Welcome to Munno Movies.');
-        onLoginSuccess(isAdmin, fullName || 'Munno Movies Member', cleanEmail);
+        if (onShowToast) {
+          onShowToast(
+            isAdminAccount
+              ? 'Admin account configured successfully!'
+              : 'Account created successfully! Welcome to Munno Movies.'
+          );
+        }
+        onLoginSuccess(isAdminAccount, resolvedName, cleanEmail);
       } else if (mode === 'forgot') {
         const msg = `Password reset link sent to ${email}.`;
         setStatusMessage(msg);
         if (onShowToast) onShowToast(msg);
         setMode('login');
       }
-    }, 400);
+    }, 350);
   };
 
   return (

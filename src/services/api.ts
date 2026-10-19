@@ -123,11 +123,37 @@ export async function getMoviePlayStream(movieId: string): Promise<string> {
     const res = await fetch(`/api/movie/${movieId}/play`);
     if (res.ok) {
       const data = await res.json();
-      if (data.streamUrl) return data.streamUrl;
+      if (data.streamUrl) return data.streamUrl.replace(/^http:\/\//i, 'https://');
     }
   } catch (e) {}
 
   return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+}
+
+/**
+ * Retrieves series container and episodes with direct stream links
+ */
+export async function fetchSeriesDetails(seriesCode: string): Promise<{
+  series_code: string;
+  count: number;
+  episodes: Array<{
+    id: number | string;
+    title: string;
+    series_code: string;
+    image: string;
+    size?: string;
+    playingurl: string;
+  }>;
+} | null> {
+  try {
+    const res = await fetch(`/api/series/${seriesCode}`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.error('Failed to fetch series details:', e);
+  }
+  return null;
 }
 
 /**
@@ -137,7 +163,7 @@ export async function searchServerCatalog(query: string): Promise<Movie[]> {
   if (!query || !query.trim()) return [];
 
   try {
-    const res = await fetch(`/api/movies?q=${encodeURIComponent(query.trim())}`);
+    const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`);
     if (!res.ok) throw new Error('Search failed');
     const movies: Movie[] = await res.json();
     return enrichMovieList(movies);
